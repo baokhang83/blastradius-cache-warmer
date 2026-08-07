@@ -1,7 +1,7 @@
 # GitHub Actions cache backend
 
-GitHub Actions is the default cache backend contract for this project. Future runtime wiring uses
-`github-actions` when `blastradius.cache.backend` is absent; use
+GitHub Actions is the default cache backend for runtime wiring. It uses `github-actions` when
+`blastradius.cache.backend` is absent; use
 `-Dblastradius.cache.backend=s3` only to select the existing S3 backend explicitly.
 
 ## Runner requirements

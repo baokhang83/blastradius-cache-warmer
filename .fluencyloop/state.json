@@ -1,10 +1,10 @@
 {
-  "feature": "14-t14-github-actions-cache-backend-second-slicecache-implem",
-  "branch": "feature/14-t14-github-actions-cache-backend-second-slicecache-implem",
+  "feature": "34-wire-cache-warmer-into-the-maven-runtime-lifecycle",
+  "branch": "feature/34-wire-cache-warmer-into-the-maven-runtime-lifecycle",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/14-t14-github-actions-cache-backend-second-slicecache-implem/sessions/001-add-a-github-actions-slicecache-backend.md",
+  "last_session": "docs/fluencyloop/features/34-wire-cache-warmer-into-the-maven-runtime-lifecycle/sessions/003-publish-only-after-a-successful-maven-session.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/14-t14-github-actions-cache-backend-second-slicecache-implem",
+  "feature_dir": "docs/fluencyloop/features/34-wire-cache-warmer-into-the-maven-runtime-lifecycle",
   "plan": "",
   "updated": "2026-08-07"
 }

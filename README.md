@@ -26,11 +26,11 @@ The Tier A, B, and C cache primitives are built and covered by unit tests:
 - Tier B dependency-tree filtering, one-object-per-third-party-JAR publication, and
   down-selected Maven local-repository restore.
 
-The runtime integration is deliberately still incomplete. `CacheWarmerExtension` currently runs
-only the gate: it does not construct a configured cache, compute impacts, or invoke a publisher
-or warmer. Installing the extension therefore still leaves Maven to build cold. Every existing
-warmer now verifies integrity before restore, but runtime cache wiring and its storage
-configuration remain future work.
+`CacheWarmerExtension` now wires Tier A and Tier C into Maven's runtime lifecycle. It creates the
+configured cache, computes the reactor blast radius, restores unaffected sibling bytecode and
+compiler state immediately before compilation, and publishes successful module output after the
+session ends. Tier B dependency slices remain available as primitives but need a separate
+dependency-manifest lifecycle before they can safely run before Maven resolves dependencies.
 
 ## How it works
 
@@ -40,13 +40,14 @@ The intended path is:
    fetched or any module is compiled — checks whether `blastradius-maven-plugin` is declared
    anywhere in the reactor. Absent, or anything about the check goes wrong: no-op, cold build,
    continue exactly as if this extension weren't installed.
-2. **Diff.** The standalone `BlastRadiusResolver` maps a git diff onto the reactor dependency
-   graph to identify changed modules and their dependents. Wiring it into the extension remains
-   pending.
-3. **Fetch and restore.** The tier warmers can fetch sibling bytecode, compiler state, or only
-   the third-party JARs selected by a module's dependency manifest. Tier B uses one cache object
-   per JAR, placed at Maven's normal repository path, so unrelated dependencies remain cold.
-4. **Verify.** Every cache restore verifies its payload against the matching integrity sidecar;
+2. **Diff.** `BlastRadiusResolver` maps the git diff onto the reactor dependency graph to identify
+   changed modules and their dependents. Those modules stay cold.
+3. **Fetch and restore.** Just before `maven-compiler-plugin:compile`, Tier A restores sibling
+   bytecode and Tier C restores compiler state for safe modules. The common `mvn clean verify`
+   command has already removed old `target` directories by then.
+4. **Publish.** After a successful Maven session, Tier A and Tier C archive each module's output
+   for a later compatible build. Failed sessions publish nothing.
+5. **Verify.** Every cache restore verifies its payload against the matching integrity sidecar;
    mismatches fail open to a cold build.
 
 Storage roles, bucket controls, and the dry-run-first purge procedure are documented in
@@ -54,11 +55,18 @@ Storage roles, bucket controls, and the dry-run-first purge procedure are docume
 
 ## Cache backends
 
-GitHub Actions cache is the default backend contract. It uses the short-lived runner token and
-signed transfer URLs already available to an Actions job, so it does not require an S3 account.
-S3 is an explicit alternative: `-Dblastradius.cache.backend=s3`. The runtime extension is not yet
-wired to construct either backend, so this selection takes effect with that future integration;
-until then, Maven builds cold as described above.
+GitHub Actions cache is the default backend. It uses the short-lived runner token and signed
+transfer URLs already available to an Actions job, so it does not require an S3 account. S3 is an
+explicit alternative:
+
+```text
+-Dblastradius.cache.backend=s3
+-Dblastradius.cache.s3.bucket=example-cache-bucket
+-Dblastradius.cache.s3.namespace=example-org/cache-warmer/v1
+```
+
+An unavailable runner service, invalid configuration, S3 error, cache miss, or failed integrity
+check always leaves Maven to build cold.
 
 See [GitHub Actions cache backend](docs/github-actions-cache.md) for the runner requirements and
 security boundary.
@@ -76,9 +84,7 @@ a change to one module never invalidates the whole reactor's cache:
 
 Full detail: [MANIFESTO.md](MANIFESTO.md).
 
-## What you'll see in the Maven output today
-
-The extension currently wires only the gate, so this is the entire observable behavior today:
+## What you'll see in the Maven output
 
 ```
 [cache-warmer] blastradius-maven-plugin not found in reactor - skipping (no-op)
@@ -88,11 +94,13 @@ or, in a reactor that declares it:
 
 ```
 [cache-warmer] blastradius-maven-plugin detected - gate passed
+[cache-warmer] runtime restore listener registered
+[cache-warmer] example-module sibling bytecode: restored sibling bytecode from key '...'
+[cache-warmer] example-module compiler state: restored compiler state from key '...'
 ```
 
-Once runtime integration lands, it will add the per-artifact warm/skip reasons already returned
-by the primitives, following the [constitution](docs/fluencyloop/constitution.md)'s
-explainability principle (§4).
+Cache misses and failures produce similarly explicit cold-build reasons, following the
+[constitution](docs/fluencyloop/constitution.md)'s explainability principle (§4).
 
 ## Requires blastradius
 
@@ -109,10 +117,9 @@ Planned in 5 milestones — see
 and its [GitHub milestones](https://github.com/baokhang83/blastradius-cache-warmer/milestones)
 for the task-level breakdown:
 
-1. **PoC** — Tier A + C primitives and benchmark harness. *(task set complete, runtime wiring
-   still pending)*
-2. **Tier B** — segmented third-party dependency publication and restore. *(T9-T11 complete,
-   runtime wiring still pending)*
+1. **PoC** — Tier A + C primitives, runtime wiring, and benchmark harness. *(complete)*
+2. **Tier B** — segmented third-party dependency publication and restore. *(primitives complete;
+   dependency-manifest runtime wiring pending)*
 3. **Security hardening** — integrity verification and S3 storage permissioning. *(T12-T13
    complete)*
 4. **Alternate storage backend** — GitHub Actions cache, the default backend. *(T14 complete)*

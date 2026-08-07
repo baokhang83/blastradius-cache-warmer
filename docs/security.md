@@ -1,7 +1,7 @@
 # Cache storage security
 
-This project does not yet connect `CacheWarmerExtension` to a remote store. This document defines
-the minimum S3 boundary that future runtime wiring must preserve.
+`CacheWarmerExtension` uses GitHub Actions cache by default. This document defines the S3 boundary
+the explicit `-Dblastradius.cache.backend=s3` alternative preserves.
 
 ## Trust boundary
 
@@ -9,7 +9,8 @@ the minimum S3 boundary that future runtime wiring must preserve.
 scope check only, not authorization: a POM is build input and can be changed by an untrusted
 contributor. AWS IAM determines whether the CI workload may read or write cache objects.
 
-Every S3-backed cache must use a nonempty, versioned namespace, for example
+Every S3-backed cache must set `blastradius.cache.s3.bucket` and a nonempty, versioned
+`blastradius.cache.s3.namespace`, for example
 `example-org/cache-warmer/v1`. `S3SliceStore` rejects a blank, root-like, or traversal-like
 namespace. This makes the configured key shape and the IAM resource match directly:
 
