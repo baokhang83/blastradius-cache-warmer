@@ -4,3 +4,6 @@
 
 # Maven build output
 target/
+
+# Blastradius's persisted, commit-keyed test-selection index
+.blastradius/
