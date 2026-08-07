@@ -10,7 +10,12 @@ import java.util.Optional;
  */
 public final class GitHubActionsSliceStore implements SliceCache {
 
-    static final String CACHE_VERSION = "blastradius-cache-warmer-v1";
+    /**
+     * GitHub's cache v2 protocol requires a 64-character format hash. It is deliberately
+     * independent of a slice key: it changes only when the ZIP payload or integrity-sidecar
+     * format becomes incompatible with an earlier release.
+     */
+    static final String CACHE_VERSION = "8b1fdce126e55b8554a95e236d7e9035287b451bd4c4a9603230483743d954a4";
 
     private final GitHubActionsCacheClient client;
 
