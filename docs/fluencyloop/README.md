@@ -19,6 +19,7 @@
 | [T11 Tier B warmer down-selected Maven repository restore](features/11-t11-tier-b-warmer-down-selected-maven-repository-restore/design.md) | - | shipped | 2026-08-07 |
 | [T12 integrity verification for every cached slice before restore](features/12-t12-integrity-verification-for-every-cached-slice-before/design.md) | - | shipped | 2026-08-07 |
 | [T13 security review for cache gating storage permissions and invalidation](features/13-t13-security-review-for-cache-gating-storage-permissions/design.md) | - | shipped | 2026-08-07 |
+| [T14 GitHub Actions cache backend second SliceCache implementation](features/14-t14-github-actions-cache-backend-second-slicecache-implem/design.md) | - | shipped | 2026-08-07 |
 | [BlastRadiusResolver — git diff -> impacted module set, with reason](features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/design.md) | - | shipped | 2026-08-07 |
 | [SliceKeyComputer — source-tree hash -> cache key, shared across tiers](features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/design.md) | - | shipped | 2026-08-07 |
 | [SliceCache abstraction + S3 backend](features/4-slicecache-abstraction-s3-backend/design.md) | - | shipped | 2026-08-07 |
