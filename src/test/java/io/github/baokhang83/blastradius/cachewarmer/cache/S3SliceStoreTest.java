@@ -34,7 +34,7 @@ class S3SliceStoreTest {
 
     @Test
     void fetch_returnsEmpty_whenTheKeyIsNotPresent() {
-        S3SliceStore store = new S3SliceStore(fakeClient(new HashMap<>()), "bucket", "");
+        S3SliceStore store = new S3SliceStore(fakeClient(new HashMap<>()), "bucket", "cache/v1");
 
         assertEquals(Optional.empty(), store.fetch("missing"));
     }
@@ -42,8 +42,8 @@ class S3SliceStoreTest {
     @Test
     void fetch_returnsTheStoredBytes_whenPresent() {
         Map<String, byte[]> objects = new HashMap<>();
-        objects.put("sibling_bytecode/core/abc", "hello".getBytes());
-        S3SliceStore store = new S3SliceStore(fakeClient(objects), "bucket", "");
+        objects.put("cache/v1/sibling_bytecode/core/abc", "hello".getBytes());
+        S3SliceStore store = new S3SliceStore(fakeClient(objects), "bucket", "cache/v1");
 
         Optional<byte[]> result = store.fetch("sibling_bytecode/core/abc");
 
@@ -66,7 +66,7 @@ class S3SliceStoreTest {
     @Test
     void fetch_throwsSliceCacheException_whenTheRequestFails() {
         S3SliceStore store = new S3SliceStore(
-                failingClient(SdkClientException.create("connection refused")), "bucket", "");
+                failingClient(SdkClientException.create("connection refused")), "bucket", "cache/v1");
 
         SliceCacheException thrown =
                 assertThrows(SliceCacheException.class, () -> store.fetch("some-key"));
@@ -88,13 +88,22 @@ class S3SliceStoreTest {
     @Test
     void put_throwsSliceCacheException_whenTheRequestFails() {
         S3SliceStore store = new S3SliceStore(
-                failingClient(SdkClientException.create("connection refused")), "bucket", "");
+                failingClient(SdkClientException.create("connection refused")), "bucket", "cache/v1");
 
         SliceCacheException thrown =
                 assertThrows(SliceCacheException.class, () -> store.put("some-key", "data".getBytes()));
 
         assertTrue(thrown.getMessage().contains("some-key"));
         assertTrue(thrown.getMessage().contains("connection refused"));
+    }
+
+    @Test
+    void constructor_rejectsAnEmptyOrUnsafeCacheNamespace() {
+        S3Client client = fakeClient(new HashMap<>());
+
+        assertThrows(IllegalArgumentException.class, () -> new S3SliceStore(client, "bucket", ""));
+        assertThrows(IllegalArgumentException.class, () -> new S3SliceStore(client, "bucket", "/cache/v1"));
+        assertThrows(IllegalArgumentException.class, () -> new S3SliceStore(client, "bucket", "cache/../v1"));
     }
 
     private static S3Client fakeClient(Map<String, byte[]> objects) {

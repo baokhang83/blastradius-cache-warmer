@@ -37,4 +37,9 @@ human-readable reason in build output, not just a boolean.
 range Y touched Z" in the log, not silence — the same standard blastradius itself holds for test
 selection.
 
+**§5 — Bound external storage.** Cache configuration must name a validated, non-root namespace,
+and credentials must be scoped to that namespace only.
+*Why:* a missing prefix or bucket-wide role turns a configuration mistake into broader access,
+whereas a bounded namespace makes the storage target and its permission boundary explicit.
+
 <!-- Grows as features harvest repeatable stances from real decisions. -->
