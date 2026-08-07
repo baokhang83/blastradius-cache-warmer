@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.warmer;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.SliceKeyComputer;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.Tier;
 import org.apache.maven.model.Build;
@@ -45,7 +46,7 @@ public class CompilerStateWarmer {
         }
         Optional<byte[]> slice;
         try {
-            slice = cache.fetch(key);
+            slice = SliceIntegrity.fetchVerified(cache, key);
         } catch (RuntimeException e) {
             return WarmResult.skipped("could not fetch compiler state for key '" + key + "': " + e.getMessage());
         }

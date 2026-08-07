@@ -1,10 +1,10 @@
 {
-  "feature": "11-t11-tier-b-warmer-down-selected-maven-repository-restore",
-  "branch": "feature/11-t11-tier-b-warmer-down-selected-maven-repository-restore",
+  "feature": "12-t12-integrity-verification-for-every-cached-slice-before",
+  "branch": "feature/12-t12-integrity-verification-for-every-cached-slice-before",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/11-t11-tier-b-warmer-down-selected-maven-repository-restore/sessions/001-restore-down-selected-maven-repository-dependencies.md",
-  "base_ref": "feature/10-t10-tier-b-publisher-segmented-third-party-jar-upload",
-  "feature_dir": "docs/fluencyloop/features/11-t11-tier-b-warmer-down-selected-maven-repository-restore",
+  "last_session": "docs/fluencyloop/features/12-t12-integrity-verification-for-every-cached-slice-before/sessions/002-wire-verified-slices-through-all-publishers-and-warmers.md",
+  "base_ref": "main",
+  "feature_dir": "docs/fluencyloop/features/12-t12-integrity-verification-for-every-cached-slice-before",
   "plan": "",
   "updated": "2026-08-07"
 }

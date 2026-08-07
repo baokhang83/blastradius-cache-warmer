@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.warmer;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.SliceKeyComputer;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.Tier;
 import org.apache.maven.model.Build;
@@ -16,6 +17,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -90,7 +92,27 @@ class CompilerStateWarmerTest {
                 read(basedir.resolve("build-output/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst")));
     }
 
+    @Test
+    void warm_skipsCompilerStateWhoseChecksumIsMissing(@TempDir Path basedir) {
+        MavenProject module = project(basedir);
+        write(basedir, "src/main/java/Foo.java", "class Foo {}");
+        String key = keys.keyFor(module, Tier.COMPILER_STATE);
+
+        WarmResult result = new CompilerStateWarmer(
+                rawCache(Map.of(key, zip(Map.of("inputFiles.lst", "state")))), keys).warm(module);
+
+        assertEquals(WarmResult.WarmStatus.SKIPPED, result.status());
+        assertTrue(result.reason().contains("checksum missing"));
+    }
+
     private static SliceCache cache(Map<String, byte[]> entries) {
+        Map<String, byte[]> verifiedEntries = new HashMap<>();
+        SliceCache cache = rawCache(verifiedEntries);
+        entries.forEach((key, value) -> SliceIntegrity.put(cache, key, value));
+        return cache;
+    }
+
+    private static SliceCache rawCache(Map<String, byte[]> entries) {
         return new SliceCache() {
             @Override
             public Optional<byte[]> fetch(String key) {
@@ -99,7 +121,7 @@ class CompilerStateWarmerTest {
 
             @Override
             public void put(String key, byte[] data) {
-                throw new UnsupportedOperationException("not needed by the warmer");
+                entries.put(key, data);
             }
         };
     }

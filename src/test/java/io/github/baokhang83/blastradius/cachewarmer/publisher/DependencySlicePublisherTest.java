@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.publisher;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.dependency.DependencyCoordinate;
 import io.github.baokhang83.blastradius.cachewarmer.dependency.DependencyManifest;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.DependencySliceKey;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class DependencySlicePublisherTest {
 
@@ -35,6 +37,9 @@ class DependencySlicePublisherTest {
                         DependencySliceKey.keyFor(junit), "junit bytes",
                         DependencySliceKey.keyFor(slf4j), "slf4j bytes"),
                 strings(cacheEntries));
+        assertArrayEquals(
+                SliceIntegrity.checksumFor(DependencySliceKey.keyFor(junit), "junit bytes".getBytes()),
+                cacheEntries.get(SliceIntegrity.checksumKeyFor(DependencySliceKey.keyFor(junit))));
     }
 
     @Test
@@ -48,6 +53,9 @@ class DependencySlicePublisherTest {
                 .publish(new DependencyManifest(List.of(present, missing)), repository);
 
         assertEquals(Map.of(DependencySliceKey.keyFor(present), "present bytes"), strings(cacheEntries));
+        assertArrayEquals(
+                SliceIntegrity.checksumFor(DependencySliceKey.keyFor(present), "present bytes".getBytes()),
+                cacheEntries.get(SliceIntegrity.checksumKeyFor(DependencySliceKey.keyFor(present))));
     }
 
     private static DependencyCoordinate coordinate(String groupId, String artifactId, String version) {
@@ -69,7 +77,8 @@ class DependencySlicePublisherTest {
     }
 
     private static Map<String, String> strings(Map<String, byte[]> entries) {
-        return entries.entrySet().stream().collect(java.util.stream.Collectors.toMap(
+        return entries.entrySet().stream().filter(entry -> !entry.getKey().startsWith("checksums/"))
+                .collect(java.util.stream.Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> new String(entry.getValue())));
     }
