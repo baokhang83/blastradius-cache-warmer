@@ -5,10 +5,10 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
-import org.slf4j.helpers.NOPLogger;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
@@ -21,15 +21,22 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class CacheWarmerExtensionTest {
 
     @Test
+    void constructorRequiresOnlyTheSisuManagedGate() {
+        assertArrayEquals(
+                new Class<?>[] {BlastradiusGate.class},
+                CacheWarmerExtension.class.getConstructors()[0].getParameterTypes());
+    }
+
+    @Test
     void doesNotThrow_whenPluginIsAbsent() {
-        CacheWarmerExtension extension = new CacheWarmerExtension(NOPLogger.NOP_LOGGER, new BlastradiusGate());
+        CacheWarmerExtension extension = new CacheWarmerExtension(new BlastradiusGate());
 
         assertDoesNotThrow(() -> extension.applyGate(List.of(projectWithPlugins())));
     }
 
     @Test
     void doesNotThrow_whenPluginIsPresent() {
-        CacheWarmerExtension extension = new CacheWarmerExtension(NOPLogger.NOP_LOGGER, new BlastradiusGate());
+        CacheWarmerExtension extension = new CacheWarmerExtension(new BlastradiusGate());
         MavenProject project = projectWithPlugins(
                 plugin("io.github.baokhang83.blastradius", "blastradius-maven-plugin"));
 
@@ -44,7 +51,7 @@ class CacheWarmerExtensionTest {
                 throw new IllegalStateException("simulated gate failure");
             }
         };
-        CacheWarmerExtension extension = new CacheWarmerExtension(NOPLogger.NOP_LOGGER, throwingGate);
+        CacheWarmerExtension extension = new CacheWarmerExtension(throwingGate);
 
         assertDoesNotThrow(() -> extension.applyGate(List.of(projectWithPlugins())));
     }

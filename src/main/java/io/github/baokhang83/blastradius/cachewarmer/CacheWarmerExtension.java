@@ -4,6 +4,7 @@ import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,12 +21,12 @@ import java.util.List;
 @Singleton
 public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
 
-    private final Logger logger;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheWarmerExtension.class);
+
     private final BlastradiusGate gate;
 
     @Inject
-    public CacheWarmerExtension(Logger logger, BlastradiusGate gate) {
-        this.logger = logger;
+    public CacheWarmerExtension(BlastradiusGate gate) {
         this.gate = gate;
     }
 
@@ -45,13 +46,13 @@ public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
         try {
             GateResult result = gate.check(projects);
             if (result == GateResult.ABSENT) {
-                logger.debug("[cache-warmer] blastradius-maven-plugin not found in reactor - skipping (no-op)");
+                LOGGER.debug("[cache-warmer] blastradius-maven-plugin not found in reactor - skipping (no-op)");
                 return;
             }
-            logger.info("[cache-warmer] blastradius-maven-plugin detected - gate passed");
+            LOGGER.info("[cache-warmer] blastradius-maven-plugin detected - gate passed");
             // Tier A/B/C warmers hook in here (T2+); nothing to warm yet in this slice.
         } catch (RuntimeException e) {
-            logger.warn("[cache-warmer] gate check failed unexpectedly - continuing with a cold build", e);
+            LOGGER.warn("[cache-warmer] gate check failed unexpectedly - continuing with a cold build", e);
         }
     }
 }
