@@ -1,10 +1,10 @@
 {
-  "feature": "9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde",
-  "branch": "feature/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde",
+  "feature": "10-t10-tier-b-publisher-segmented-third-party-jar-upload",
+  "branch": "feature/10-t10-tier-b-publisher-segmented-third-party-jar-upload",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde/sessions/001-parse-and-filter-tier-b-dependency-coordinates.md",
+  "last_session": "docs/fluencyloop/features/10-t10-tier-b-publisher-segmented-third-party-jar-upload/sessions/001-publish-segmented-third-party-jar-cache-objects.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde",
+  "feature_dir": "docs/fluencyloop/features/10-t10-tier-b-publisher-segmented-third-party-jar-upload",
   "plan": "",
   "updated": "2026-08-07"
 }

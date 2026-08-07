@@ -15,6 +15,7 @@
 | feature | plan | status | started |
 |---------|------|--------|---------|
 | [Maven Core Extension skeleton + BlastradiusGate (fail-open gate)](features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/design.md) | - | shipped | 2026-08-07 |
+| [T10 Tier B publisher segmented third-party JAR upload](features/10-t10-tier-b-publisher-segmented-third-party-jar-upload/design.md) | - | in progress | 2026-08-07 |
 | [BlastRadiusResolver — git diff -> impacted module set, with reason](features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/design.md) | - | shipped | 2026-08-07 |
 | [SliceKeyComputer — source-tree hash -> cache key, shared across tiers](features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/design.md) | - | shipped | 2026-08-07 |
 | [SliceCache abstraction + S3 backend](features/4-slicecache-abstraction-s3-backend/design.md) | - | shipped | 2026-08-07 |
@@ -22,4 +23,4 @@
 | [T6 Tier A warmer sibling bytecode restore into target/classes](features/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas/design.md) | - | shipped | 2026-08-07 |
 | [T7 Tier C warmer incremental compiler state restore into target/maven-status](features/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t/design.md) | - | shipped | 2026-08-07 |
 | [T8 PoC benchmark harness on a real monorepo run](features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run/design.md) | - | shipped | 2026-08-07 |
-| [T9 dependency-tree parser and Tier B slice manifest builder](features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde/design.md) | - | in progress | 2026-08-07 |
+| [T9 dependency-tree parser and Tier B slice manifest builder](features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde/design.md) | - | shipped | 2026-08-07 |
