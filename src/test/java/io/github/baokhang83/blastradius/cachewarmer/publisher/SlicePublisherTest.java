@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.publisher;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.SliceKeyComputer;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.Tier;
 import org.apache.maven.model.Build;
@@ -21,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SlicePublisherTest {
@@ -48,6 +50,16 @@ class SlicePublisherTest {
                         "maven-compiler-plugin/compile/default-compile/inputFiles.lst",
                         "src/main/java/Foo.java"),
                 unzip(cacheEntries.get(keys.keyFor(module, Tier.COMPILER_STATE))));
+        assertArrayEquals(
+                SliceIntegrity.checksumFor(
+                        keys.keyFor(module, Tier.SIBLING_BYTECODE),
+                        cacheEntries.get(keys.keyFor(module, Tier.SIBLING_BYTECODE))),
+                cacheEntries.get(SliceIntegrity.checksumKeyFor(keys.keyFor(module, Tier.SIBLING_BYTECODE))));
+        assertArrayEquals(
+                SliceIntegrity.checksumFor(
+                        keys.keyFor(module, Tier.COMPILER_STATE),
+                        cacheEntries.get(keys.keyFor(module, Tier.COMPILER_STATE))),
+                cacheEntries.get(SliceIntegrity.checksumKeyFor(keys.keyFor(module, Tier.COMPILER_STATE))));
     }
 
     @Test

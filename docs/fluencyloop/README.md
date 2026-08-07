@@ -16,7 +16,8 @@
 |---------|------|--------|---------|
 | [Maven Core Extension skeleton + BlastradiusGate (fail-open gate)](features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/design.md) | - | shipped | 2026-08-07 |
 | [T10 Tier B publisher segmented third-party JAR upload](features/10-t10-tier-b-publisher-segmented-third-party-jar-upload/design.md) | - | shipped | 2026-08-07 |
-| [T11 Tier B warmer down-selected Maven repository restore](features/11-t11-tier-b-warmer-down-selected-maven-repository-restore/design.md) | - | in progress | 2026-08-07 |
+| [T11 Tier B warmer down-selected Maven repository restore](features/11-t11-tier-b-warmer-down-selected-maven-repository-restore/design.md) | - | shipped | 2026-08-07 |
+| [T12 integrity verification for every cached slice before restore](features/12-t12-integrity-verification-for-every-cached-slice-before/design.md) | - | in progress | 2026-08-07 |
 | [BlastRadiusResolver — git diff -> impacted module set, with reason](features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/design.md) | - | shipped | 2026-08-07 |
 | [SliceKeyComputer — source-tree hash -> cache key, shared across tiers](features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/design.md) | - | shipped | 2026-08-07 |
 | [SliceCache abstraction + S3 backend](features/4-slicecache-abstraction-s3-backend/design.md) | - | shipped | 2026-08-07 |

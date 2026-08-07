@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.warmer;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.dependency.DependencyCoordinate;
 import io.github.baokhang83.blastradius.cachewarmer.dependency.DependencyManifest;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.DependencySliceKey;
@@ -42,7 +43,7 @@ public class DependencySliceWarmer {
         String key = DependencySliceKey.keyFor(coordinate);
         Optional<byte[]> slice;
         try {
-            slice = cache.fetch(key);
+            slice = SliceIntegrity.fetchVerified(cache, key);
         } catch (RuntimeException e) {
             return WarmResult.skipped("could not fetch dependency for key '" + key + "': " + e.getMessage());
         }

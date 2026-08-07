@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.publisher;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.SliceKeyComputer;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.Tier;
 import org.apache.maven.model.Build;
@@ -42,7 +43,7 @@ public class SlicePublisher {
     }
 
     private void publishIfPresent(MavenProject module, Tier tier, Path outputDirectory) {
-        archive(outputDirectory).ifPresent(data -> cache.put(keys.keyFor(module, tier), data));
+        archive(outputDirectory).ifPresent(data -> SliceIntegrity.put(cache, keys.keyFor(module, tier), data));
     }
 
     private static Path buildPath(MavenProject module, String directory) {

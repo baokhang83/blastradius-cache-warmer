@@ -1,6 +1,7 @@
 package io.github.baokhang83.blastradius.cachewarmer.publisher;
 
 import io.github.baokhang83.blastradius.cachewarmer.cache.SliceCache;
+import io.github.baokhang83.blastradius.cachewarmer.cache.SliceIntegrity;
 import io.github.baokhang83.blastradius.cachewarmer.dependency.DependencyCoordinate;
 import io.github.baokhang83.blastradius.cachewarmer.dependency.DependencyManifest;
 import io.github.baokhang83.blastradius.cachewarmer.slicekey.DependencySliceKey;
@@ -32,7 +33,7 @@ public class DependencySlicePublisher {
             return;
         }
         try {
-            cache.put(DependencySliceKey.keyFor(coordinate), Files.readAllBytes(artifact));
+            SliceIntegrity.put(cache, DependencySliceKey.keyFor(coordinate), Files.readAllBytes(artifact));
         } catch (IOException e) {
             throw new UncheckedIOException("Could not read dependency JAR at " + artifact, e);
         }
