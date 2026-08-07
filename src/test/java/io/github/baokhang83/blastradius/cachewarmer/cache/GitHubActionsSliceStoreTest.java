@@ -81,8 +81,10 @@ class GitHubActionsSliceStoreTest {
 
         assertEquals(3, operations.size());
         assertTrue(operations.get(0).contains("\"key\":\"slice-key\""));
+        assertTrue(operations.get(0).contains("\"version\":\"" + GitHubActionsSliceStore.CACHE_VERSION + "\""));
         assertEquals("PUT:payload", operations.get(1));
         assertTrue(operations.get(2).contains("\"size_bytes\":\"7\""));
+        assertTrue(operations.get(2).contains("\"version\":\"" + GitHubActionsSliceStore.CACHE_VERSION + "\""));
     }
 
     @Test
@@ -113,6 +115,12 @@ class GitHubActionsSliceStoreTest {
         assertEquals(CacheBackend.GITHUB_ACTIONS, CacheBackend.fromConfiguredValue("github-actions"));
         assertEquals(CacheBackend.S3, CacheBackend.fromConfiguredValue("s3"));
         assertEquals(CacheBackend.S3, CacheBackend.fromSystemProperties(properties));
+    }
+
+    @Test
+    void cacheVersion_isThe64CharacterGitHubActionsFormatHash() {
+        assertEquals(64, GitHubActionsSliceStore.CACHE_VERSION.length());
+        assertTrue(GitHubActionsSliceStore.CACHE_VERSION.matches("[0-9a-f]{64}"));
     }
 
     private GitHubActionsSliceStore store() {
