@@ -21,4 +21,5 @@
 | [T5 SlicePublisher for Tier A/C post-build upload of bytecode and compiler state](features/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco/design.md) | - | shipped | 2026-08-07 |
 | [T6 Tier A warmer sibling bytecode restore into target/classes](features/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas/design.md) | - | shipped | 2026-08-07 |
 | [T7 Tier C warmer incremental compiler state restore into target/maven-status](features/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t/design.md) | - | shipped | 2026-08-07 |
-| [T8 PoC benchmark harness on a real monorepo run](features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run/design.md) | - | in progress | 2026-08-07 |
+| [T8 PoC benchmark harness on a real monorepo run](features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run/design.md) | - | shipped | 2026-08-07 |
+| [T9 dependency-tree parser and Tier B slice manifest builder](features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde/design.md) | - | in progress | 2026-08-07 |

@@ -1,10 +1,10 @@
 {
-  "feature": "8-t8-poc-benchmark-harness-on-a-real-monorepo-run",
-  "branch": "feature/8-t8-poc-benchmark-harness-on-a-real-monorepo-run",
+  "feature": "9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde",
+  "branch": "feature/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run/sessions/001-benchmark-the-real-blastradius-maven-reactor-without-mak.md",
+  "last_session": "docs/fluencyloop/features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde/sessions/001-parse-and-filter-tier-b-dependency-coordinates.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run",
+  "feature_dir": "docs/fluencyloop/features/9-t9-dependency-tree-parser-and-tier-b-slice-manifest-builde",
   "plan": "",
   "updated": "2026-08-07"
 }
