@@ -1,0 +1,48 @@
+name: Maven build
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Maven verify with Blastradius 0.3.2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.16
+
+      - name: Restore Blastradius index
+        id: blastradius-index
+        uses: actions/cache/restore@v6
+        with:
+          path: .blastradius
+          key: blastradius-index-v1-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            blastradius-index-v1-${{ runner.os }}-
+
+      - name: Verify with Blastradius 0.3.2
+        run: mvn -B --no-transfer-progress -Pblastradius clean verify
+
+      - name: Save Blastradius index from main
+        if: github.ref == 'refs/heads/main' && success()
+        uses: actions/cache/save@v6
+        with:
+          path: .blastradius
+          key: blastradius-index-v1-${{ runner.os }}-${{ github.sha }}

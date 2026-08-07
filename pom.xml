@@ -164,4 +164,33 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- CI enables this profile so Blastradius can narrow the test set before Surefire runs.
+             Keeping it opt-in preserves the ordinary local Maven command while making the exact
+             plugin version and the tracked branch explicit and reproducible. -->
+        <profile>
+            <id>blastradius</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.baokhang83.blastradius</groupId>
+                        <artifactId>blastradius-maven-plugin</artifactId>
+                        <version>0.3.2</version>
+                        <executions>
+                            <execution>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>select</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <baseRef>origin/main</baseRef>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
