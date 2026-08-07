@@ -1,10 +1,10 @@
 {
-  "feature": "2-blastradiusresolver-git-diff-blastradius-map-impacted-modu",
-  "branch": "feature/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu",
+  "feature": "3-slicekeycomputer-source-tree-hash-cache-key-shared-across",
+  "branch": "feature/3-slicekeycomputer-source-tree-hash-cache-key-shared-across",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/sessions/001-t2-blastradiusresolver-gitdiff-reactormodulegraph-impact.md",
+  "last_session": "docs/fluencyloop/features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/sessions/001-tier-enum-slicekeycomputer-source-tree-hash-jdk-version.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu",
+  "feature_dir": "docs/fluencyloop/features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across",
   "plan": "",
   "updated": "2026-08-07"
 }
