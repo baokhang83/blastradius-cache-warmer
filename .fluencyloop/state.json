@@ -1,10 +1,10 @@
 {
-  "feature": "6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas",
-  "branch": "feature/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas",
+  "feature": "7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t",
+  "branch": "feature/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas/sessions/002-t6-fail-open-when-tier-a-key-computation-cannot-read-sou.md",
+  "last_session": "docs/fluencyloop/features/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t/sessions/001-restore-tier-c-compiler-state-through-the-shared-atomic.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas",
+  "feature_dir": "docs/fluencyloop/features/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t",
   "plan": "",
   "updated": "2026-08-07"
 }
