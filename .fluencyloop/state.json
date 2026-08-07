@@ -1,10 +1,10 @@
 {
-  "feature": "3-slicekeycomputer-source-tree-hash-cache-key-shared-across",
-  "branch": "feature/3-slicekeycomputer-source-tree-hash-cache-key-shared-across",
+  "feature": "4-slicecache-abstraction-s3-backend",
+  "branch": "feature/4-slicecache-abstraction-s3-backend",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/sessions/001-tier-enum-slicekeycomputer-source-tree-hash-jdk-version.md",
+  "last_session": "docs/fluencyloop/features/4-slicecache-abstraction-s3-backend/sessions/002-s3slicestore-aws-sdk-v2-backed-slicecache-implementation.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across",
+  "feature_dir": "docs/fluencyloop/features/4-slicecache-abstraction-s3-backend",
   "plan": "",
   "updated": "2026-08-07"
 }

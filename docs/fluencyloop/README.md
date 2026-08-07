@@ -16,4 +16,5 @@
 |---------|------|--------|---------|
 | [Maven Core Extension skeleton + BlastradiusGate (fail-open gate)](features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/design.md) | - | shipped | 2026-08-07 |
 | [BlastRadiusResolver — git diff -> impacted module set, with reason](features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/design.md) | - | shipped | 2026-08-07 |
-| [SliceKeyComputer - source-tree hash -> cache key, shared across tiers](features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/design.md) | - | in progress | 2026-08-07 |
+| [SliceKeyComputer — source-tree hash -> cache key, shared across tiers](features/3-slicekeycomputer-source-tree-hash-cache-key-shared-across/design.md) | - | shipped | 2026-08-07 |
+| [SliceCache abstraction + S3 backend](features/4-slicecache-abstraction-s3-backend/design.md) | - | in progress | 2026-08-07 |

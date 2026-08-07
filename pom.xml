@@ -35,9 +35,29 @@
         <slf4j.version>2.0.18</slf4j.version>
         <junit.version>5.10.2</junit.version>
 
+        <!-- Not provided by Maven itself, unlike maven-core/slf4j-api above - S3SliceStore
+             needs a real compile-scope client. Core Extensions resolve their own dependency
+             graph into an isolated realm, so this doesn't touch Maven's own classpath. -->
+        <aws.sdk.version>2.46.7</aws.sdk.version>
+
         <enforcer.plugin.version>3.6.3</enforcer.plugin.version>
         <sisu.plugin.version>0.9.0.M3</sisu.plugin.version>
     </properties>
+
+    <!-- Pins every software.amazon.awssdk module (s3, url-connection-client, and their
+         transitive siblings) to one release in lockstep, so adding a second AWS module later
+         can't silently drift a version out of sync with this one. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- provided: Maven supplies these at runtime via the core classpath. Shading them
@@ -64,6 +84,28 @@
             <artifactId>javax.inject</artifactId>
             <version>1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- s3 pulls in apache5-client as its default runtime HTTP client; excluded because
+             we supply url-connection-client below instead, and apache5-client's own transitive
+             httpcore5 versions don't converge with the BOM (a version mismatch inside AWS's own
+             dependency graph, unrelated to anything we chose). -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache5-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- The lightest-weight sync HTTP client v2 ships (java.net.HttpURLConnection under
+             the hood) - avoids pulling in Apache HttpClient or Netty, which we'd otherwise need
+             to satisfy S3Client's requirement for an explicit HTTP implementation. -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
         </dependency>
 
         <dependency>
