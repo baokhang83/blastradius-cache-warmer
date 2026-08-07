@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.baokhang83.blastradius</groupId>
+    <artifactId>blastradius-cache-warmer-maven-extension</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>blastradius-cache-warmer-maven-extension</name>
+    <description>Maven Core Extension that pre-warms sibling bytecode, segmented dependency
+        slices, and incremental compiler state in CI, gated on the presence of
+        blastradius-maven-plugin in the reactor.</description>
+    <url>https://github.com/baokhang83/blastradius-cache-warmer</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <maven.minimum.version>3.9.6</maven.minimum.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Matches the maven-core version this extension is built and tested against;
+             kept as `provided` so the extension reuses Maven's own classes at runtime
+             instead of shading a second, possibly-conflicting copy onto the core classpath. -->
+        <maven.core.version>3.9.9</maven.core.version>
+        <slf4j.version>2.0.18</slf4j.version>
+        <junit.version>5.10.2</junit.version>
+
+        <enforcer.plugin.version>3.6.3</enforcer.plugin.version>
+        <sisu.plugin.version>0.9.0.M3</sisu.plugin.version>
+    </properties>
+
+    <dependencies>
+        <!-- provided: Maven supplies these at runtime via the core classpath. Shading them
+             into the extension jar would risk a second, version-skewed copy alongside
+             Maven's own - the exact classpath-pollution risk a Core Extension (unlike a
+             Mojo, which loads in an isolated plugin realm) can't isolate itself from. -->
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${maven.core.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- @Named/@Singleton/@Inject - the annotations Sisu's main-index goal scans for.
+             Pinned explicitly (provided) rather than relied on transitively through
+             maven-core, so the version is visible here, not implied by maven-core's graph. -->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${enforcer.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-build-baseline</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[${maven.minimum.version},)</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>[21,)</version>
+                                </requireJavaVersion>
+                                <dependencyConvergence/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generates META-INF/sisu/javax.inject.Named by scanning compiled classes for
+                 @Named, instead of hand-maintaining that index file - the standard mechanism
+                 real Maven Core Extensions (e.g. maven-build-cache-extension) use so Sisu can
+                 discover CacheWarmerExtension without a components.xml. -->
+            <plugin>
+                <groupId>org.eclipse.sisu</groupId>
+                <artifactId>sisu-maven-plugin</artifactId>
+                <version>${sisu.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-sisu-index</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>main-index</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

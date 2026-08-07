@@ -12,4 +12,6 @@
 
 ## Features
 
-_None yet._
+| feature | plan | status | started |
+|---------|------|--------|---------|
+| [Maven Core Extension skeleton + BlastradiusGate (fail-open license check)](features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/design.md) | - | in progress | 2026-08-07 |
