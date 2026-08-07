@@ -1,0 +1,4 @@
+
+# FluencyLoop writes these LF; pin so Git does not warn/convert on Windows.
+.fluencyloop/** text eol=lf
+docs/fluencyloop/** text eol=lf
