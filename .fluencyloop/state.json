@@ -1,10 +1,10 @@
 {
-  "feature": "10-t10-tier-b-publisher-segmented-third-party-jar-upload",
-  "branch": "feature/10-t10-tier-b-publisher-segmented-third-party-jar-upload",
+  "feature": "11-t11-tier-b-warmer-down-selected-maven-repository-restore",
+  "branch": "feature/11-t11-tier-b-warmer-down-selected-maven-repository-restore",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/10-t10-tier-b-publisher-segmented-third-party-jar-upload/sessions/001-publish-segmented-third-party-jar-cache-objects.md",
-  "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/10-t10-tier-b-publisher-segmented-third-party-jar-upload",
+  "last_session": "docs/fluencyloop/features/11-t11-tier-b-warmer-down-selected-maven-repository-restore/sessions/001-restore-down-selected-maven-repository-dependencies.md",
+  "base_ref": "feature/10-t10-tier-b-publisher-segmented-third-party-jar-upload",
+  "feature_dir": "docs/fluencyloop/features/11-t11-tier-b-warmer-down-selected-maven-repository-restore",
   "plan": "",
   "updated": "2026-08-07"
 }
