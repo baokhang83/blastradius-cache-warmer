@@ -37,6 +37,11 @@ jobs:
           restore-keys: |
             blastradius-index-v1-${{ runner.os }}-
 
+      - name: Expose GitHub Actions cache runtime
+        # Maven runs in a shell step, while the runner normally scopes ACTIONS_* credentials to
+        # action steps. This exports the short-lived cache endpoint and token only for this job.
+        uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
+
       - name: Verify with Blastradius 0.3.2
         run: mvn -B --no-transfer-progress -Pblastradius clean verify
 
