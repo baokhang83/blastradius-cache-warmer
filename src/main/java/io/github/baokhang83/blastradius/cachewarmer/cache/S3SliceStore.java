@@ -27,7 +27,7 @@ public class S3SliceStore implements SliceCache {
     public S3SliceStore(S3Client client, String bucket, String keyPrefix) {
         this.client = client;
         this.bucket = bucket;
-        this.keyPrefix = keyPrefix == null ? "" : keyPrefix;
+        this.keyPrefix = requireCacheNamespace(keyPrefix);
     }
 
     @Override
@@ -57,6 +57,22 @@ public class S3SliceStore implements SliceCache {
     }
 
     private String objectKey(String key) {
-        return keyPrefix.isEmpty() ? key : keyPrefix + "/" + key;
+        return keyPrefix + "/" + key;
+    }
+
+    private static String requireCacheNamespace(String keyPrefix) {
+        if (keyPrefix == null || keyPrefix.isBlank()) {
+            throw new IllegalArgumentException("keyPrefix must name a nonempty cache namespace");
+        }
+        if (keyPrefix.startsWith("/") || keyPrefix.endsWith("/")) {
+            throw new IllegalArgumentException("keyPrefix must not start or end with '/'");
+        }
+        for (String segment : keyPrefix.split("/")) {
+            if (segment.isBlank() || segment.equals(".") || segment.equals("..")) {
+                throw new IllegalArgumentException(
+                        "keyPrefix must not contain empty, '.' or '..' namespace segments");
+            }
+        }
+        return keyPrefix;
     }
 }

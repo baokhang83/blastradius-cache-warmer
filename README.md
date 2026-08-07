@@ -3,7 +3,7 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="Apache 2.0 license" /></a>
 <a target="_blank" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"><img src="https://img.shields.io/badge/JDK-21+-green.svg" /></a>
 <a target="_blank" href="https://github.com/baokhang83/blastradius"><img src="https://img.shields.io/badge/requires-blastradius-orange.svg" /></a>
-<img src="https://img.shields.io/badge/status-M2%20primitives%20complete-yellow.svg" />
+<img src="https://img.shields.io/badge/status-M3%20security%20hardening%20complete-yellow.svg" />
 
 A Maven Core Extension foundation for pre-warming a CI build's `~/.m2/repository`, sibling
 `target/classes`, and `target/maven-status` from remote cache storage. Its intended runtime path
@@ -28,8 +28,9 @@ The Tier A, B, and C cache primitives are built and covered by unit tests:
 
 The runtime integration is deliberately still incomplete. `CacheWarmerExtension` currently runs
 only the gate: it does not construct a configured cache, compute impacts, or invoke a publisher
-or warmer. Installing the extension therefore still leaves Maven to build cold. Integrity
-verification is also upcoming, so remote cache restore is not yet production-ready.
+or warmer. Installing the extension therefore still leaves Maven to build cold. Every existing
+warmer now verifies integrity before restore, but runtime cache wiring and its storage
+configuration remain future work.
 
 ## How it works
 
@@ -45,7 +46,11 @@ The intended path is:
 3. **Fetch and restore.** The tier warmers can fetch sibling bytecode, compiler state, or only
    the third-party JARs selected by a module's dependency manifest. Tier B uses one cache object
    per JAR, placed at Maven's normal repository path, so unrelated dependencies remain cold.
-4. **Verify.** Integrity verification before any restore is planned work, not current behavior.
+4. **Verify.** Every cache restore verifies its payload against the matching integrity sidecar;
+   mismatches fail open to a cold build.
+
+Storage roles, bucket controls, and the dry-run-first purge procedure are documented in
+[security.md](docs/security.md).
 
 ## The 3-tier caching strategy
 
@@ -97,7 +102,8 @@ for the task-level breakdown:
    still pending)*
 2. **Tier B** — segmented third-party dependency publication and restore. *(T9-T11 complete,
    runtime wiring still pending)*
-3. **Security hardening** — integrity verification before any slice is restored.
+3. **Security hardening** — integrity verification and S3 storage permissioning. *(T12-T13
+   complete)*
 4. **Alternate storage backend** — GitHub Actions cache, for teams without S3.
 5. **Gradle support** *(future)* — parked until the Maven path is proven and secured.
 

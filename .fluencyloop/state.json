@@ -1,10 +1,10 @@
 {
-  "feature": "12-t12-integrity-verification-for-every-cached-slice-before",
-  "branch": "feature/12-t12-integrity-verification-for-every-cached-slice-before",
+  "feature": "13-t13-security-review-for-cache-gating-storage-permissions",
+  "branch": "feature/13-t13-security-review-for-cache-gating-storage-permissions",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/12-t12-integrity-verification-for-every-cached-slice-before/sessions/002-wire-verified-slices-through-all-publishers-and-warmers.md",
+  "last_session": "docs/fluencyloop/features/13-t13-security-review-for-cache-gating-storage-permissions/sessions/002-document-least-privilege-iam-and-safe-cache-purging.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/12-t12-integrity-verification-for-every-cached-slice-before",
+  "feature_dir": "docs/fluencyloop/features/13-t13-security-review-for-cache-gating-storage-permissions",
   "plan": "",
   "updated": "2026-08-07"
 }
