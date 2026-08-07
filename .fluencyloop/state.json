@@ -1,10 +1,10 @@
 {
-  "feature": "13-t13-security-review-for-cache-gating-storage-permissions",
-  "branch": "feature/13-t13-security-review-for-cache-gating-storage-permissions",
+  "feature": "14-t14-github-actions-cache-backend-second-slicecache-implem",
+  "branch": "feature/14-t14-github-actions-cache-backend-second-slicecache-implem",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/13-t13-security-review-for-cache-gating-storage-permissions/sessions/002-document-least-privilege-iam-and-safe-cache-purging.md",
+  "last_session": "docs/fluencyloop/features/14-t14-github-actions-cache-backend-second-slicecache-implem/sessions/001-add-a-github-actions-slicecache-backend.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/13-t13-security-review-for-cache-gating-storage-permissions",
+  "feature_dir": "docs/fluencyloop/features/14-t14-github-actions-cache-backend-second-slicecache-implem",
   "plan": "",
   "updated": "2026-08-07"
 }

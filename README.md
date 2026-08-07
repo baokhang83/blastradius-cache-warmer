@@ -3,7 +3,7 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="Apache 2.0 license" /></a>
 <a target="_blank" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"><img src="https://img.shields.io/badge/JDK-21+-green.svg" /></a>
 <a target="_blank" href="https://github.com/baokhang83/blastradius"><img src="https://img.shields.io/badge/requires-blastradius-orange.svg" /></a>
-<img src="https://img.shields.io/badge/status-M3%20security%20hardening%20complete-yellow.svg" />
+<img src="https://img.shields.io/badge/status-M4%20alternate%20backend%20complete-yellow.svg" />
 
 A Maven Core Extension foundation for pre-warming a CI build's `~/.m2/repository`, sibling
 `target/classes`, and `target/maven-status` from remote cache storage. Its intended runtime path
@@ -21,7 +21,7 @@ installed at all.
 The Tier A, B, and C cache primitives are built and covered by unit tests:
 
 - a fail-open blastradius presence gate, git-diff/reactor impact resolver, source-tree keying,
-  and a storage-neutral `SliceCache` with an S3 implementation;
+  and a storage-neutral `SliceCache` with GitHub Actions and S3 implementations;
 - Tier A/C publication and restore for sibling bytecode and compiler state;
 - Tier B dependency-tree filtering, one-object-per-third-party-JAR publication, and
   down-selected Maven local-repository restore.
@@ -51,6 +51,17 @@ The intended path is:
 
 Storage roles, bucket controls, and the dry-run-first purge procedure are documented in
 [security.md](docs/security.md).
+
+## Cache backends
+
+GitHub Actions cache is the default backend contract. It uses the short-lived runner token and
+signed transfer URLs already available to an Actions job, so it does not require an S3 account.
+S3 is an explicit alternative: `-Dblastradius.cache.backend=s3`. The runtime extension is not yet
+wired to construct either backend, so this selection takes effect with that future integration;
+until then, Maven builds cold as described above.
+
+See [GitHub Actions cache backend](docs/github-actions-cache.md) for the runner requirements and
+security boundary.
 
 ## The 3-tier caching strategy
 
@@ -104,7 +115,7 @@ for the task-level breakdown:
    runtime wiring still pending)*
 3. **Security hardening** — integrity verification and S3 storage permissioning. *(T12-T13
    complete)*
-4. **Alternate storage backend** — GitHub Actions cache, for teams without S3.
+4. **Alternate storage backend** — GitHub Actions cache, the default backend. *(T14 complete)*
 5. **Gradle support** *(future)* — parked until the Maven path is proven and secured.
 
 ## License

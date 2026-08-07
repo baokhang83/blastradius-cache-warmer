@@ -16,8 +16,8 @@ started: 2026-08-07
     dependency — this tool does not work without blastradius installed and licensed).
   - Gating: presence + validity of blastradius's existing local license/config. **Fails open** —
     missing or invalid license means a silent no-op, build proceeds cold, never fails the build.
-  - Pluggable slice storage: S3 as the first backend, GitHub Actions cache as a second backend
-    option.
+  - Pluggable slice storage: GitHub Actions cache as the default backend, with S3 as an explicit
+    backend option.
   - Single org (your team's monorepo) for the whole roadmap below.
   - A security-hardening milestone: integrity verification of every slice before it's restored
     into a build, since this system injects unreviewed binaries into someone else's compile.
