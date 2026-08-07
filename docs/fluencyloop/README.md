@@ -14,4 +14,5 @@
 
 | feature | plan | status | started |
 |---------|------|--------|---------|
-| [Maven Core Extension skeleton + BlastradiusGate (fail-open license check)](features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/design.md) | - | in progress | 2026-08-07 |
+| [Maven Core Extension skeleton + BlastradiusGate (fail-open gate)](features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/design.md) | - | shipped | 2026-08-07 |
+| [BlastRadiusResolver - git diff + .blastradius map -> impacted module set, with reason](features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/design.md) | - | in progress | 2026-08-07 |

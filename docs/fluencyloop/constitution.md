@@ -12,9 +12,19 @@ after the fact.
 
 **§2 — Clean code & simplicity.** Prefer the simplest mechanism that satisfies the current
 milestone; no speculative abstraction for hypothetical multi-tenant/expansion scenarios until
-they're real.
+they're real. Names carry the load-bearing meaning: classes/enums/interfaces `PascalCase`,
+methods/fields/locals `camelCase`, no abbreviations that make a reader guess (`resolver`, not
+`rslvr`), booleans read as a predicate (`isPresent`, `hasChanged` — not `flag` or `check`), and
+a name states what a thing *is* or *does*, not how it's implemented (`SliceCache`, not
+`SliceHashMapWrapper`). This is a code-review commitment, not a linter rule — like TDD (§1),
+it's checked by a reader, not a build gate, so a PR that violates it gets asked to rename, not
+auto-failed.
 *Why:* multi-tenant productization and Gradle support are explicitly deferred; premature
-generality here is wasted surface area to maintain and review.
+generality here is wasted surface area to maintain and review. Naming was left implicit in the
+original draft of this principle, which meant "clean code" had no concrete, checkable meaning
+for the part of it reviewers actually run into on every single PR — naming is the highest-
+frequency judgment call in code review, so it's the part most worth writing down rather than
+each reviewer improvising a standard.
 
 **§3 — Safety over speed.** Every gate (license check, cache fetch, integrity verification) must
 fail open to a cold, correct build rather than fail closed into a broken or silently-stale one.

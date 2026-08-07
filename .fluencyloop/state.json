@@ -1,10 +1,10 @@
 {
-  "feature": "1-maven-core-extension-skeleton-blastradiusgate-fail-open-li",
-  "branch": "feature/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li",
+  "feature": "2-blastradiusresolver-git-diff-blastradius-map-impacted-modu",
+  "branch": "feature/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li/sessions/001-t1-core-extension-skeleton-blastradiusgate.md",
+  "last_session": "docs/fluencyloop/features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu/sessions/001-t2-blastradiusresolver-gitdiff-reactormodulegraph-impact.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/1-maven-core-extension-skeleton-blastradiusgate-fail-open-li",
+  "feature_dir": "docs/fluencyloop/features/2-blastradiusresolver-git-diff-blastradius-map-impacted-modu",
   "plan": "",
   "updated": "2026-08-07"
 }
