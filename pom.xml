@@ -6,7 +6,7 @@
 
     <groupId>io.github.baokhang83.blastradius</groupId>
     <artifactId>blastradius-cache-warmer-maven-extension</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.3.3</version>
     <packaging>jar</packaging>
 
     <name>blastradius-cache-warmer-maven-extension</name>
@@ -19,14 +19,36 @@
         <license>
             <name>Apache License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <id>baokhang83</id>
+            <name>Bao Khang</name>
+            <url>https://github.com/baokhang83</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/baokhang83/blastradius-cache-warmer.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/baokhang83/blastradius-cache-warmer.git</developerConnection>
+        <url>https://github.com/baokhang83/blastradius-cache-warmer</url>
+        <tag>v0.3.3</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/baokhang83/blastradius-cache-warmer/issues</url>
+    </issueManagement>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <maven.minimum.version>3.9.6</maven.minimum.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <central.skip.publishing>true</central.skip.publishing>
 
         <!-- Matches the maven-core version this extension is built and tested against;
              kept as `provided` so the extension reuses Maven's own classes at runtime
@@ -42,6 +64,10 @@
 
         <enforcer.plugin.version>3.6.3</enforcer.plugin.version>
         <sisu.plugin.version>0.9.0.M3</sisu.plugin.version>
+        <source.plugin.version>3.3.1</source.plugin.version>
+        <javadoc.plugin.version>3.12.0</javadoc.plugin.version>
+        <gpg.plugin.version>3.2.8</gpg.plugin.version>
+        <central.publishing.plugin.version>0.11.0</central.publishing.plugin.version>
     </properties>
 
     <!-- Pins every software.amazon.awssdk module (s3, url-connection-client, and their
@@ -187,6 +213,74 @@
                         </executions>
                         <configuration>
                             <baseRef>origin/main</baseRef>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${source.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${javadoc.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${gpg.plugin.version}</version>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                            <passphraseEnvName>MAVEN_GPG_PASSPHRASE</passphraseEnvName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-release-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central.publishing.plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                            <skipPublishing>${central.skip.publishing}</skipPublishing>
                         </configuration>
                     </plugin>
                 </plugins>
