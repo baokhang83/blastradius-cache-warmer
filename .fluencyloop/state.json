@@ -1,10 +1,10 @@
 {
-  "feature": "5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco",
-  "branch": "feature/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco",
+  "feature": "6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas",
+  "branch": "feature/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco/sessions/001-t5-slicepublisher-archive-and-cache-tier-a-c-build-outpu.md",
-  "base_ref": "feature/4-slicecache-abstraction-s3-backend",
-  "feature_dir": "docs/fluencyloop/features/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco",
+  "last_session": "docs/fluencyloop/features/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas/sessions/002-t6-fail-open-when-tier-a-key-computation-cannot-read-sou.md",
+  "base_ref": "main",
+  "feature_dir": "docs/fluencyloop/features/6-t6-tier-a-warmer-sibling-bytecode-restore-into-target-clas",
   "plan": "",
   "updated": "2026-08-07"
 }
