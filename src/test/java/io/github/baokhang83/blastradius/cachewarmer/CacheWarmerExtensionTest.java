@@ -1,0 +1,68 @@
+package io.github.baokhang83.blastradius.cachewarmer;
+
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.project.MavenProject;
+import org.junit.jupiter.api.Test;
+import org.slf4j.helpers.NOPLogger;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+/**
+ * Exercises {@link CacheWarmerExtension#applyGate} directly rather than
+ * {@code afterProjectsRead(MavenSession)} - constructing a real {@code MavenSession} needs a
+ * repository session, execution request, and execution result this unit doesn't otherwise
+ * touch. {@code afterProjectsRead} itself is a one-line delegation to {@code applyGate}; Maven
+ * actually invoking it at the right lifecycle point is an integration concern, not this slice's.
+ */
+class CacheWarmerExtensionTest {
+
+    @Test
+    void doesNotThrow_whenPluginIsAbsent() {
+        CacheWarmerExtension extension = new CacheWarmerExtension(NOPLogger.NOP_LOGGER, new BlastradiusGate());
+
+        assertDoesNotThrow(() -> extension.applyGate(List.of(projectWithPlugins())));
+    }
+
+    @Test
+    void doesNotThrow_whenPluginIsPresent() {
+        CacheWarmerExtension extension = new CacheWarmerExtension(NOPLogger.NOP_LOGGER, new BlastradiusGate());
+        MavenProject project = projectWithPlugins(
+                plugin("io.github.baokhang83.blastradius", "blastradius-maven-plugin"));
+
+        assertDoesNotThrow(() -> extension.applyGate(List.of(project)));
+    }
+
+    @Test
+    void failsOpen_whenTheGateItselfThrows() {
+        BlastradiusGate throwingGate = new BlastradiusGate() {
+            @Override
+            public GateResult check(List<MavenProject> projects) {
+                throw new IllegalStateException("simulated gate failure");
+            }
+        };
+        CacheWarmerExtension extension = new CacheWarmerExtension(NOPLogger.NOP_LOGGER, throwingGate);
+
+        assertDoesNotThrow(() -> extension.applyGate(List.of(projectWithPlugins())));
+    }
+
+    private static MavenProject projectWithPlugins(Plugin... plugins) {
+        Build build = new Build();
+        for (Plugin plugin : plugins) {
+            build.addPlugin(plugin);
+        }
+        Model model = new Model();
+        model.setBuild(build);
+        return new MavenProject(model);
+    }
+
+    private static Plugin plugin(String groupId, String artifactId) {
+        Plugin plugin = new Plugin();
+        plugin.setGroupId(groupId);
+        plugin.setArtifactId(artifactId);
+        return plugin;
+    }
+}
