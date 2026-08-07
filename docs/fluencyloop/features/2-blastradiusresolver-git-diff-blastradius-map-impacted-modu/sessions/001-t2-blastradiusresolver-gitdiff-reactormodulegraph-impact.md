@@ -39,11 +39,33 @@ persisted so the fluency doesn't evaporate with the conversation. About the work
 
 ### Components (role, conditions)
 
-<!-- - **<component / role / mechanism>** — <what it does, and under what conditions> · status: documented -->
+- **GitDiff** — wraps `git diff --name-only <baseRef>...HEAD` as a subprocess; the triple-dot
+  form diffs against the merge-base, not baseRef's current tip, so commits baseRef picks up
+  after the branch point never show up as "changed." Throws `GitDiffException` on a non-zero
+  exit or missing binary; the caller (T3+'s wiring into `applyGate`) is expected to catch and
+  fail open, same posture as `BlastradiusGate`. · status: documented
+- **ReactorModuleGraph** — built fresh per `from(List<MavenProject>)` call from the live
+  session's projects, not from re-parsed POMs; anchors all basedirs on whichever project has
+  `isExecutionRoot() == true`. `moduleOf`/`dependentsOf`/`isReactorWide` are the only public
+  surface. · status: documented
+- **BlastRadiusResolver** — the orchestrator: `resolve(projects, baseRef)` pulls changed paths
+  from `GitDiff`, builds a `ReactorModuleGraph`, and folds each changed path into a
+  `Map<ModuleId, String>` of first-reason-wins impacts. Not annotated `@Named`/`@Singleton` and
+  not called from `CacheWarmerExtension` yet - deliberately, since nothing wires it up in this
+  slice. · status: follow-up (wiring into `applyGate` is a later slice)
 
 ### Hard-won conditions (gotchas, root causes, limitations)
 
-<!-- - **<the non-obvious thing>** — <why it's this way / what breaks otherwise> · status: documented -->
+- **`moduleOf`'s prefix match makes the root module a catch-all by construction** — a basedir of
+  `""` satisfies `String.startsWith("")` for any path, so once an execution-root project is
+  present, `isReactorWide` can never fire; it's purely the "no execution-root project in the
+  list at all" fallback. This assumes the Maven execution root's basedir *is* the git repository
+  root - true for every setup this repo targets, but worth knowing if cache-warmer ever needs to
+  support a Maven root nested inside a larger monorepo. · status: documented
+- **Test `MavenProject`s need `setFile(...)`, not just a `Model`** — `getBasedir()` derives from
+  `getFile().getParentFile()`; `new MavenProject(model)` alone leaves it `null` and any
+  basedir-relativizing code NPEs. The path doesn't need to exist on disk, only the `File` object
+  math has to work. · status: documented
 
 ---
 
