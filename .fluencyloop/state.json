@@ -1,10 +1,10 @@
 {
-  "feature": "4-slicecache-abstraction-s3-backend",
-  "branch": "feature/4-slicecache-abstraction-s3-backend",
+  "feature": "5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco",
+  "branch": "feature/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/4-slicecache-abstraction-s3-backend/sessions/002-s3slicestore-aws-sdk-v2-backed-slicecache-implementation.md",
-  "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/4-slicecache-abstraction-s3-backend",
+  "last_session": "docs/fluencyloop/features/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco/sessions/001-t5-slicepublisher-archive-and-cache-tier-a-c-build-outpu.md",
+  "base_ref": "feature/4-slicecache-abstraction-s3-backend",
+  "feature_dir": "docs/fluencyloop/features/5-t5-slicepublisher-for-tier-a-c-post-build-upload-of-byteco",
   "plan": "",
   "updated": "2026-08-07"
 }
