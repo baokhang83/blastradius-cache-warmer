@@ -3,14 +3,13 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="Apache 2.0 license" /></a>
 <a target="_blank" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"><img src="https://img.shields.io/badge/JDK-21+-green.svg" /></a>
 <a target="_blank" href="https://github.com/baokhang83/blastradius"><img src="https://img.shields.io/badge/requires-blastradius-orange.svg" /></a>
-<img src="https://img.shields.io/badge/status-PoC%20(M1%20in%20progress)-lightgrey.svg" />
+<img src="https://img.shields.io/badge/status-M2%20primitives%20complete-yellow.svg" />
 
-A Maven Core Extension that pre-warms a CI build's `~/.m2/repository`, sibling `target/classes`,
-and `target/maven-status` from cloud storage — scoped to exactly the modules a change's
-**blast radius** doesn't touch, using [blastradius](https://github.com/baokhang83/blastradius)'s
-own dependency map. Everywhere else, an ephemeral CI runner spends 2–5 minutes of every build
-re-downloading a monolithic dependency cache and recompiling code nobody changed. This tool
-skips both, for the modules a diff proves are unaffected.
+A Maven Core Extension foundation for pre-warming a CI build's `~/.m2/repository`, sibling
+`target/classes`, and `target/maven-status` from remote cache storage. Its intended runtime path
+uses a git-diff blast-radius calculation to restore only state belonging to unaffected modules.
+That avoids the usual ephemeral-runner cost of re-downloading dependencies and recompiling code
+nobody changed.
 
 It only ever activates for [blastradius](https://github.com/baokhang83/blastradius) users — see
 [Requires blastradius](#requires-blastradius) — and it fails open: anything it can't warm
@@ -19,26 +18,34 @@ installed at all.
 
 ## Status
 
-This project is at the start of its roadmap: only **T1 — the Core Extension skeleton and the
-blastradius-presence gate** is built so far. Tiers A/B/C, cloud storage, and integrity
-verification are tracked as upcoming milestones, not shipped behavior — see
-[Roadmap](#roadmap) before assuming any tier below actually restores anything yet.
+The Tier A, B, and C cache primitives are built and covered by unit tests:
+
+- a fail-open blastradius presence gate, git-diff/reactor impact resolver, source-tree keying,
+  and a storage-neutral `SliceCache` with an S3 implementation;
+- Tier A/C publication and restore for sibling bytecode and compiler state;
+- Tier B dependency-tree filtering, one-object-per-third-party-JAR publication, and
+  down-selected Maven local-repository restore.
+
+The runtime integration is deliberately still incomplete. `CacheWarmerExtension` currently runs
+only the gate: it does not construct a configured cache, compute impacts, or invoke a publisher
+or warmer. Installing the extension therefore still leaves Maven to build cold. Integrity
+verification is also upcoming, so remote cache restore is not yet production-ready.
 
 ## How it works
+
+The intended path is:
 
 1. **Gate.** `afterProjectsRead` — Maven's pre-resolution hook, before any dependency is
    fetched or any module is compiled — checks whether `blastradius-maven-plugin` is declared
    anywhere in the reactor. Absent, or anything about the check goes wrong: no-op, cold build,
    continue exactly as if this extension weren't installed.
-2. **Diff.** *(M1, not yet built)* Reads blastradius's own dependency map plus the current git
-   diff to compute which modules are inside the change's blast radius versus provably
-   unaffected by it.
-3. **Fetch.** *(M1, not yet built)* For every unaffected module, fetches its cached slices —
-   bytecode, dependency jars, compiler state — from cloud storage (S3 first; a GitHub Actions
-   cache backend is a later milestone), keyed by a hash of that module's source tree.
-4. **Restore.** *(M1, not yet built)* Verifies each slice, then drops it into place before
-   Maven ever reaches dependency resolution or compilation — so Maven finds warm state and
-   skips the work entirely, module by module.
+2. **Diff.** The standalone `BlastRadiusResolver` maps a git diff onto the reactor dependency
+   graph to identify changed modules and their dependents. Wiring it into the extension remains
+   pending.
+3. **Fetch and restore.** The tier warmers can fetch sibling bytecode, compiler state, or only
+   the third-party JARs selected by a module's dependency manifest. Tier B uses one cache object
+   per JAR, placed at Maven's normal repository path, so unrelated dependencies remain cold.
+4. **Verify.** Integrity verification before any restore is planned work, not current behavior.
 
 ## The 3-tier caching strategy
 
@@ -55,8 +62,7 @@ Full detail: [MANIFESTO.md](MANIFESTO.md).
 
 ## What you'll see in the Maven output today
 
-T1 only builds the gate — there is nothing yet for it to hand off to, so this is the entire
-observable behavior right now:
+The extension currently wires only the gate, so this is the entire observable behavior today:
 
 ```
 [cache-warmer] blastradius-maven-plugin not found in reactor - skipping (no-op)
@@ -68,9 +74,9 @@ or, in a reactor that declares it:
 [cache-warmer] blastradius-maven-plugin detected - gate passed
 ```
 
-Once M1 lands, that second line will be followed by a per-module warm/skip report with a
-concrete reason for each decision — the [constitution](docs/fluencyloop/constitution.md)'s
-explainability principle (§4) — not just this pass/no-op boundary.
+Once runtime integration lands, it will add the per-artifact warm/skip reasons already returned
+by the primitives, following the [constitution](docs/fluencyloop/constitution.md)'s
+explainability principle (§4).
 
 ## Requires blastradius
 
@@ -87,8 +93,10 @@ Planned in 5 milestones — see
 and its [GitHub milestones](https://github.com/baokhang83/blastradius-cache-warmer/milestones)
 for the task-level breakdown:
 
-1. **PoC** — Tier A + C, S3-backed storage only. *(in progress — T1 done)*
-2. **Tier B** — segmented third-party dependency restore.
+1. **PoC** — Tier A + C primitives and benchmark harness. *(task set complete, runtime wiring
+   still pending)*
+2. **Tier B** — segmented third-party dependency publication and restore. *(T9-T11 complete,
+   runtime wiring still pending)*
 3. **Security hardening** — integrity verification before any slice is restored.
 4. **Alternate storage backend** — GitHub Actions cache, for teams without S3.
 5. **Gradle support** *(future)* — parked until the Maven path is proven and secured.
