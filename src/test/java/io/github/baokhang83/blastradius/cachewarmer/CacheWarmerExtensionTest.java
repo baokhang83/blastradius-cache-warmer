@@ -23,8 +23,12 @@ class CacheWarmerExtensionTest {
     @Test
     void constructorRequiresOnlyTheSisuManagedGate() {
         assertArrayEquals(
-                new Class<?>[] {BlastradiusGate.class},
-                CacheWarmerExtension.class.getConstructors()[0].getParameterTypes());
+                new Class<?>[] {BlastradiusGate.class, io.github.baokhang83.blastradius.cachewarmer.cache.RuntimeCacheFactory.class},
+                java.util.Arrays.stream(CacheWarmerExtension.class.getConstructors())
+                        .filter(constructor -> constructor.isAnnotationPresent(javax.inject.Inject.class))
+                        .findFirst()
+                        .orElseThrow()
+                        .getParameterTypes());
     }
 
     @Test
