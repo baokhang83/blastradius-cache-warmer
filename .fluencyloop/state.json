@@ -1,10 +1,10 @@
 {
-  "feature": "7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t",
-  "branch": "feature/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t",
+  "feature": "8-t8-poc-benchmark-harness-on-a-real-monorepo-run",
+  "branch": "feature/8-t8-poc-benchmark-harness-on-a-real-monorepo-run",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t/sessions/001-restore-tier-c-compiler-state-through-the-shared-atomic.md",
+  "last_session": "docs/fluencyloop/features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run/sessions/001-benchmark-the-real-blastradius-maven-reactor-without-mak.md",
   "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/7-t7-tier-c-warmer-incremental-compiler-state-restore-into-t",
+  "feature_dir": "docs/fluencyloop/features/8-t8-poc-benchmark-harness-on-a-real-monorepo-run",
   "plan": "",
   "updated": "2026-08-07"
 }
