@@ -5,14 +5,15 @@
 <img src="https://img.shields.io/badge/Maven-Core%20Extension-blue.svg" alt="Maven Core Extension" />
 <img src="https://img.shields.io/badge/status-M4%20alternate%20backend%20complete-yellow.svg" />
 
-A Maven Core Extension foundation for pre-warming a CI build's `~/.m2/repository`, sibling
-`target/classes`, and `target/maven-status` from remote cache storage. Its intended runtime path
-uses a git-diff blast-radius calculation to restore only state belonging to unaffected modules.
-That avoids the usual ephemeral-runner cost of re-downloading dependencies and recompiling code
-nobody changed.
+> **Skip redundant Maven compilation in CI with verified bytecode reuse.**
 
-It works with Maven reactors directly. It fails open: anything it can't warm confidently simply
-builds cold, as if this extension were not installed.
+Cache Warmer is a Maven Core Extension that uses the Git diff and Maven reactor to identify
+unchanged modules. For a safe cache hit, it restores verified production `.class` files and Maven
+Compiler Plugin state, then skips that module's production compilation. Changed or uncertain
+modules build normally.
+
+It works with Maven reactors directly and does not cache or skip test execution. It fails open:
+anything it cannot warm confidently simply builds cold, as if this extension were not installed.
 
 ## Status
 
@@ -40,15 +41,16 @@ The intended path is:
 2. **Diff.** `BlastRadiusResolver` maps the git diff onto the Maven reactor dependency graph to identify
    changed modules and their dependents. Those modules stay cold.
 3. **Fetch and restore.** Just before `maven-compiler-plugin:compile`, Tier A restores sibling
-   bytecode and Tier C restores compiler state for safe modules. The common `mvn clean verify`
-   command has already removed old `target` directories by then.
+   bytecode and Tier C restores compiler state for safe modules. Maven's resources phase may
+   already have created `target/classes`; Tier A merges only verified `.class` files and leaves
+   the current build's resources intact.
 4. **Skip only a verified compile hit.** When both restores succeed for the same safe module,
    the extension sets `skipMain=true` on that exact compiler execution. Maven then reuses the
    restored output instead of deciding from checkout timestamps that it must compile again. A
    partial restore, cache miss, integrity failure, or setup error leaves the execution unchanged
    and compiles cold.
-5. **Publish.** After a successful Maven session, Tier A and Tier C archive each module's output
-   for a later compatible build. Failed sessions publish nothing.
+5. **Publish.** After a successful Maven session, Tier A archives production `.class` files and
+   Tier C archives compiler state for a later compatible build. Failed sessions publish nothing.
 6. **Verify.** Every cache restore verifies its payload against the matching integrity sidecar;
    mismatches fail open to a cold build.
 
@@ -80,7 +82,7 @@ a change to one module never invalidates the whole reactor's cache:
 
 | Tier | Restores | Why |
 |---|---|---|
-| **A — Sibling bytecode** | `target/classes/` | If module A depends on module B and B is outside the blast radius, there's no reason to recompile B — its bytecode is dropped in directly. |
+| **A — Sibling bytecode** | production `.class` files in `target/classes/` | If module A depends on module B and B is outside the blast radius, there's no reason to recompile B — verified bytecode is restored directly while current resources remain intact. |
 | **B — Segmented dependencies** | `~/.m2/repository/` | A change to an isolated module doesn't need every third-party jar the whole monorepo uses — only the down-selected subset that module's own dependency tree requires. |
 | **C — Incremental compiler state** | `target/maven-status/` | `maven-compiler-plugin` tracks incremental-build state locally; a clean CI runner has none, forcing a full rebuild even for genuinely unaffected code. Restoring it preserves incremental tracking across ephemeral runners. |
 
