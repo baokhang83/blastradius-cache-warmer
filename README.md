@@ -2,7 +2,7 @@
 
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="Apache 2.0 license" /></a>
 <a target="_blank" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"><img src="https://img.shields.io/badge/JDK-21+-green.svg" /></a>
-<a target="_blank" href="https://github.com/baokhang83/blastradius"><img src="https://img.shields.io/badge/requires-blastradius-orange.svg" /></a>
+<img src="https://img.shields.io/badge/Maven-Core%20Extension-blue.svg" alt="Maven Core Extension" />
 <img src="https://img.shields.io/badge/status-M4%20alternate%20backend%20complete-yellow.svg" />
 
 A Maven Core Extension foundation for pre-warming a CI build's `~/.m2/repository`, sibling
@@ -11,17 +11,15 @@ uses a git-diff blast-radius calculation to restore only state belonging to unaf
 That avoids the usual ephemeral-runner cost of re-downloading dependencies and recompiling code
 nobody changed.
 
-It only ever activates for [blastradius](https://github.com/baokhang83/blastradius) users — see
-[Requires blastradius](#requires-blastradius) — and it fails open: anything it can't warm
-confidently, it simply leaves for Maven to build cold, same as if this extension weren't
-installed at all.
+It works with Maven reactors directly. It fails open: anything it can't warm confidently simply
+builds cold, as if this extension were not installed.
 
 ## Status
 
 The Tier A, B, and C cache primitives are built and covered by unit tests:
 
-- a fail-open blastradius presence gate, git-diff/reactor impact resolver, source-tree keying,
-  and a storage-neutral `SliceCache` with GitHub Actions and S3 implementations;
+- a git-diff/reactor impact resolver, source-tree keying, and a storage-neutral `SliceCache` with
+  GitHub Actions and S3 implementations;
 - Tier A/C publication and restore for sibling bytecode and compiler state;
 - Tier B dependency-tree filtering, one-object-per-third-party-JAR publication, and
   down-selected Maven local-repository restore.
@@ -36,11 +34,10 @@ dependency-manifest lifecycle before they can safely run before Maven resolves d
 
 The intended path is:
 
-1. **Gate.** `afterProjectsRead` — Maven's pre-resolution hook, before any dependency is
-   fetched or any module is compiled — checks whether `blastradius-maven-plugin` is declared
-   anywhere in the reactor. Absent, or anything about the check goes wrong: no-op, cold build,
-   continue exactly as if this extension weren't installed.
-2. **Diff.** `BlastRadiusResolver` maps the git diff onto the reactor dependency graph to identify
+1. **Initialize.** `afterProjectsRead` — Maven's pre-resolution hook, before any dependency is
+   fetched or any module is compiled — creates the configured cache and runtime listener. A cache,
+   git, or reactor setup error fails open to a cold build.
+2. **Diff.** `BlastRadiusResolver` maps the git diff onto the Maven reactor dependency graph to identify
    changed modules and their dependents. Those modules stay cold.
 3. **Fetch and restore.** Just before `maven-compiler-plugin:compile`, Tier A restores sibling
    bytecode and Tier C restores compiler state for safe modules. The common `mvn clean verify`
@@ -92,13 +89,6 @@ Full detail: [MANIFESTO.md](MANIFESTO.md).
 ## What you'll see in the Maven output
 
 ```
-[cache-warmer] blastradius-maven-plugin not found in reactor - skipping (no-op)
-```
-
-or, in a reactor that declares it:
-
-```
-[cache-warmer] blastradius-maven-plugin detected - gate passed
 [cache-warmer] runtime restore listener registered
 [cache-warmer] example-module sibling bytecode: restored sibling bytecode from key '...'
 [cache-warmer] example-module compiler state: restored compiler state from key '...'
@@ -108,13 +98,16 @@ or, in a reactor that declares it:
 Cache misses and failures produce similarly explicit cold-build reasons, following the
 [constitution](docs/fluencyloop/constitution.md)'s explainability principle (§4).
 
-## Requires blastradius
+## Consumer requirements
 
-This is a hard dependency, by design: cache-warmer only activates for reactors that already
-run [blastradius](https://github.com/baokhang83/blastradius), and it uses blastradius's own
-ground-truth dependency map to decide what's inside a change's blast radius. It is not a
-general-purpose Maven cache — see [Constitution §2](docs/fluencyloop/constitution.md) on why
-that scope is deliberate, not a limitation to work around later.
+Cache-warmer is a Maven Core Extension: a consumer opts in by adding it to
+`.mvn/extensions.xml`. Its safe warm path needs a Git checkout with the configured base ref and
+a Maven reactor. GitHub Actions cache also needs the runner's short-lived cache runtime exposed
+to the Maven shell step; GitHub scopes those values to Actions by default. S3 is an explicit
+alternative for other CI systems.
+
+[Blastradius](https://github.com/baokhang83/blastradius) is the pilot reactor used to validate
+the extension, not an adoption prerequisite.
 
 ## Roadmap
 

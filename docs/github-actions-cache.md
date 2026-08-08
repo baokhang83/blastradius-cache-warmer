@@ -16,9 +16,20 @@ The backend sends that token only to the runner cache service. That service retu
 for the actual byte download and upload, so no personal access token, AWS credential, or cache
 URL belongs in repository configuration.
 
+GitHub scopes these values to Actions rather than `run` steps. Before Maven runs, expose them to
+the job environment with a runtime-export action, for example:
+
+```yaml
+- name: Expose GitHub Actions cache runtime
+  uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
+```
+
+This is an Actions platform boundary, not a Blastradius requirement. The extension fails open if
+the values are unavailable, so non-Actions builds remain ordinary cold Maven builds.
+
 Outside a GitHub Actions job, the environment is intentionally incomplete and store construction
-fails with a clear configuration error. Until `CacheWarmerExtension` is wired to construct a
-store, Maven still performs its normal cold build rather than selecting S3 implicitly.
+fails with a clear configuration error. `CacheWarmerExtension` catches that setup failure and
+Maven performs its normal cold build rather than selecting S3 implicitly.
 
 ## Cache behavior
 

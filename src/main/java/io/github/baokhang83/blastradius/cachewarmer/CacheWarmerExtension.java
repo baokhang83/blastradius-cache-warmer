@@ -19,14 +19,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 /**
- * Entry point every later tier (T2-T7) hooks into. Maven discovers this via Sisu component
- * scanning (declared as a Core Extension in a consuming project's {@code .mvn/extensions.xml})
- * and calls {@link #afterProjectsRead} once the reactor is built, before dependency resolution
- * - the manifesto's pre-resolution phase.
+ * Maven discovers this Core Extension through Sisu component scanning and calls
+ * {@link #afterProjectsRead} once the consuming reactor is built, before dependency resolution.
  */
 @Named("cache-warmer")
 @Singleton
@@ -34,18 +31,16 @@ public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheWarmerExtension.class);
 
-    private final BlastradiusGate gate;
     private final RuntimeCacheFactory cacheFactory;
     private RuntimeBuildContext runtimeContext;
 
     @Inject
-    public CacheWarmerExtension(BlastradiusGate gate, RuntimeCacheFactory cacheFactory) {
-        this.gate = gate;
+    public CacheWarmerExtension(RuntimeCacheFactory cacheFactory) {
         this.cacheFactory = cacheFactory;
     }
 
-    CacheWarmerExtension(BlastradiusGate gate) {
-        this(gate, new RuntimeCacheFactory());
+    CacheWarmerExtension() {
+        this(new RuntimeCacheFactory());
     }
 
     @Override
@@ -55,9 +50,6 @@ public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
             // Any restored outputs would be deleted immediately by `clean`, and that child
             // must not publish competing slices while the outer build is still active.
             LOGGER.info("[cache-warmer] Blastradius TRACK child detected - skipping cache runtime setup");
-            return;
-        }
-        if (!applyGate(session.getProjects())) {
             return;
         }
         try {
@@ -94,28 +86,6 @@ public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
 
         SlicePublisher publisher = new SlicePublisher(context.cache(), new SliceKeyComputer());
         new RuntimeCachePublisher(publisher::publish).publish(session.getProjects());
-    }
-
-    /**
-     * The actual gate-then-warm boundary, split out from {@link #afterProjectsRead} so it's
-     * testable without constructing a real {@link MavenSession}. Constitution SS3: this must
-     * fail open. A build-time surprise here - in code whose entire job is shaving CI minutes -
-     * must never turn into someone else's broken build, so any unexpected exception is logged
-     * and swallowed rather than propagated.
-     */
-    boolean applyGate(List<MavenProject> projects) {
-        try {
-            GateResult result = gate.check(projects);
-            if (result == GateResult.ABSENT) {
-                LOGGER.debug("[cache-warmer] blastradius-maven-plugin not found in reactor - skipping (no-op)");
-                return false;
-            }
-            LOGGER.info("[cache-warmer] blastradius-maven-plugin detected - gate passed");
-            return true;
-        } catch (RuntimeException e) {
-            LOGGER.warn("[cache-warmer] gate check failed unexpectedly - continuing with a cold build", e);
-            return false;
-        }
     }
 
     private static Properties mergedProperties(MavenSession session) {

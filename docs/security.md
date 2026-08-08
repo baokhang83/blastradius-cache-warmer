@@ -5,8 +5,8 @@ the explicit `-Dblastradius.cache.backend=s3` alternative preserves.
 
 ## Trust boundary
 
-`BlastradiusGate` checks whether the Maven reactor declares the blastradius plugin. That is a
-scope check only, not authorization: a POM is build input and can be changed by an untrusted
+Cache-warmer determines safe restores from Git changes and Maven's reactor graph. That controls
+build correctness, not authorization: repository inputs can be changed by an untrusted
 contributor. AWS IAM determines whether the CI workload may read or write cache objects.
 
 Every S3-backed cache must set `blastradius.cache.s3.bucket` and a nonempty, versioned
