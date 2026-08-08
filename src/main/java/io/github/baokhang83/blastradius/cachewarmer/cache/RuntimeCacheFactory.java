@@ -11,9 +11,8 @@ import java.util.Properties;
 import java.util.function.Supplier;
 
 /**
- * Creates the one cache store a Maven session uses after the extension has passed its
- * Blastradius gate. The default is the GitHub Actions service because it needs no separately
- * managed storage; S3 remains an explicit, configured alternative.
+ * Creates the one cache store a Maven session uses. The default is the GitHub Actions service
+ * because it needs no separately managed storage; S3 remains an explicit, configured alternative.
  */
 @Named
 @Singleton

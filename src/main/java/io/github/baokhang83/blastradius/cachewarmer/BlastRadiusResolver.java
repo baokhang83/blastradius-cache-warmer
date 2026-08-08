@@ -13,11 +13,8 @@ import java.util.Set;
 
 /**
  * git diff + the reactor's module graph -&gt; the set of modules a cache restore isn't safe for,
- * with a reason per module (SS4 Explainability). Not wired into {@link CacheWarmerExtension} yet
- * - that's a follow-up slice once this is solid, the same split T1 used between
- * {@link BlastradiusGate} and the extension. No {@code @Named}/{@code @Singleton} here yet either
- * for the same reason: adding DI annotations before anything actually injects this would claim a
- * wiring that doesn't exist.
+ * with a reason per module (SS4 Explainability). It has no dependency on a build plugin: every
+ * Maven reactor supplies the project model needed to construct the graph.
  */
 public class BlastRadiusResolver {
 
