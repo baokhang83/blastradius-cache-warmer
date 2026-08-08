@@ -45,9 +45,14 @@ The intended path is:
 3. **Fetch and restore.** Just before `maven-compiler-plugin:compile`, Tier A restores sibling
    bytecode and Tier C restores compiler state for safe modules. The common `mvn clean verify`
    command has already removed old `target` directories by then.
-4. **Publish.** After a successful Maven session, Tier A and Tier C archive each module's output
+4. **Skip only a verified compile hit.** When both restores succeed for the same safe module,
+   the extension sets `skipMain=true` on that exact compiler execution. Maven then reuses the
+   restored output instead of deciding from checkout timestamps that it must compile again. A
+   partial restore, cache miss, integrity failure, or setup error leaves the execution unchanged
+   and compiles cold.
+5. **Publish.** After a successful Maven session, Tier A and Tier C archive each module's output
    for a later compatible build. Failed sessions publish nothing.
-5. **Verify.** Every cache restore verifies its payload against the matching integrity sidecar;
+6. **Verify.** Every cache restore verifies its payload against the matching integrity sidecar;
    mismatches fail open to a cold build.
 
 Storage roles, bucket controls, and the dry-run-first purge procedure are documented in
@@ -97,6 +102,7 @@ or, in a reactor that declares it:
 [cache-warmer] runtime restore listener registered
 [cache-warmer] example-module sibling bytecode: restored sibling bytecode from key '...'
 [cache-warmer] example-module compiler state: restored compiler state from key '...'
+[cache-warmer] example-module compiler: skipped after verified bytecode and compiler-state restore
 ```
 
 Cache misses and failures produce similarly explicit cold-build reasons, following the

@@ -8,7 +8,10 @@ set -euo pipefail
 readonly DEFAULT_SOURCE="https://github.com/baokhang83/blastradius.git"
 readonly CACHE_WARMER_GROUP="io.github.baokhang83.blastradius"
 readonly CACHE_WARMER_ARTIFACT="blastradius-cache-warmer-maven-extension"
-readonly CACHE_WARMER_VERSION="0.1.0-SNAPSHOT"
+
+script_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+readonly CACHE_WARMER_ROOT=$(cd "$script_directory/.." && pwd)
+readonly CACHE_WARMER_VERSION=$(cd "$CACHE_WARMER_ROOT" && mvn -q -DforceStdout help:evaluate -Dexpression=project.version)
 
 source_repository="$DEFAULT_SOURCE"
 reference="origin/main"
@@ -37,7 +40,8 @@ Arguments after -- replace the default Maven arguments. For example:
   scripts/benchmark-blastradius.sh --runs 5 -- -B -Pself-host-blastradius verify
 
 The script exits 0 only when every build succeeds and every warm trial contains a cache-warmer
-restore event. Exit 2 means the measurement is inconclusive and the report explains why.
+restore event plus evidence that the restored module's compiler execution was skipped. Exit 2
+means the measurement is inconclusive and the report explains why.
 USAGE
 }
 
@@ -88,13 +92,9 @@ XML
 
 install_extension() {
     local local_repository=$1
-    local script_directory
-    script_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-    local cache_warmer_root
-    cache_warmer_root=$(cd "$script_directory/.." && pwd)
 
     (
-        cd "$cache_warmer_root"
+        cd "$CACHE_WARMER_ROOT"
         mvn -B --no-transfer-progress -DskipTests -Dmaven.repo.local="$local_repository" install
     )
 }
@@ -156,7 +156,8 @@ run_trial() {
     [[ -n "$seconds" ]] || seconds="NA"
 
     local evidence="none"
-    if grep -Eq '\[cache-warmer\].*(restored|RESTORED)' "$log_file"; then
+    if grep -Eq '\[cache-warmer\].*(restored|RESTORED)' "$log_file" \
+            && grep -Eq '\[cache-warmer\].*compiler: skipped after verified' "$log_file"; then
         evidence="restored"
     elif grep -Eq '\[cache-warmer\]' "$log_file"; then
         evidence="no-restore"
@@ -271,7 +272,7 @@ if [[ "$all_builds_passed" != true ]]; then
     exit 2
 fi
 if [[ "$all_warm_runs_restored" != true ]]; then
-    printf 'Result: INCONCLUSIVE (no cache-warmer restore evidence in one or more warm logs)\n' >&2
+    printf 'Result: INCONCLUSIVE (no cache-warmer restore-and-skip evidence in one or more warm logs)\n' >&2
     exit 2
 fi
-printf 'Result: MEASURED (all warm runs contained restore evidence)\n'
+printf 'Result: MEASURED (all warm runs contained restore-and-skip evidence)\n'

@@ -28,10 +28,11 @@ scripts/benchmark-blastradius.sh \
 
 The output directory contains `results.tsv`, one Maven log per trial, timing files, and the
 unmeasured preparation-build log. A successful measurement requires every build to pass and every
-warm log to contain a cache-warmer restore event. Otherwise the script exits with status `2` and
-reports `INCONCLUSIVE`.
+warm log to contain cache-warmer restore evidence plus the `compiler: skipped after verified`
+message. Otherwise the script exits with status `2` and reports `INCONCLUSIVE`.
 
-This is deliberate: elapsed time alone is not evidence that cache warming helped. In the current
-implementation, `CacheWarmerExtension` only runs the Blastradius gate and does not yet invoke the
-Tier A/C publisher or warmers. Therefore a run today is expected to be inconclusive; the harness
-makes that integration gap visible instead of publishing a false speedup claim.
+This is deliberate: elapsed time alone is not evidence that cache warming helped. The warm run
+must use a configured cache backend that can serve the exact slices for the chosen revision. The
+default GitHub Actions backend is available only inside an Actions job, so a local measurement
+without an explicit S3 backend is expected to be inconclusive. The harness makes missing restore
+or skip evidence visible instead of publishing a false speedup claim.

@@ -7,6 +7,7 @@ import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 
@@ -23,10 +24,12 @@ class CacheLifecycleListenerTest {
         AtomicInteger compilerStateWarms = new AtomicInteger();
         CacheLifecycleListener listener = listener(ImpactedModules.of(Set.of()), bytecodeWarms, compilerStateWarms);
 
-        listener.mojoStarted(compilerEvent(project("safe-module"), "compile"));
+        ExecutionEvent event = compilerEvent(project("safe-module"), "compile");
+        listener.mojoStarted(event);
 
         assertEquals(1, bytecodeWarms.get());
         assertEquals(1, compilerStateWarms.get());
+        assertEquals("true", event.getMojoExecution().getConfiguration().getChild("skipMain").getValue());
     }
 
     @Test
@@ -55,8 +58,35 @@ class CacheLifecycleListenerTest {
         assertEquals(0, compilerStateWarms.get());
     }
 
+    @Test
+    void doesNotSkipCompilerWhenOnlyOneTierRestores() {
+        AtomicInteger bytecodeWarms = new AtomicInteger();
+        AtomicInteger compilerStateWarms = new AtomicInteger();
+        CacheLifecycleListener listener = listener(
+                ImpactedModules.of(Set.of()), bytecodeWarms, compilerStateWarms, WarmResult.restored("bytecode restored"),
+                WarmResult.skipped("compiler state unavailable"));
+        ExecutionEvent event = compilerEvent(project("safe-module"), "compile");
+
+        listener.mojoStarted(event);
+
+        assertEquals(1, bytecodeWarms.get());
+        assertEquals(1, compilerStateWarms.get());
+        assertEquals(null, event.getMojoExecution().getConfiguration());
+    }
+
     private static CacheLifecycleListener listener(
             ImpactedModules impacts, AtomicInteger bytecodeWarms, AtomicInteger compilerStateWarms) {
+        return listener(
+                impacts, bytecodeWarms, compilerStateWarms,
+                WarmResult.restored("bytecode restored"), WarmResult.restored("compiler state restored"));
+    }
+
+    private static CacheLifecycleListener listener(
+            ImpactedModules impacts,
+            AtomicInteger bytecodeWarms,
+            AtomicInteger compilerStateWarms,
+            WarmResult bytecodeResult,
+            WarmResult compilerStateResult) {
         SliceCache cache = new SliceCache() {
             @Override
             public java.util.Optional<byte[]> fetch(String key) {
@@ -73,11 +103,11 @@ class CacheLifecycleListenerTest {
                 context,
                 ignored -> {
                     bytecodeWarms.incrementAndGet();
-                    return WarmResult.restored("bytecode restored");
+                    return bytecodeResult;
                 },
                 ignored -> {
                     compilerStateWarms.incrementAndGet();
-                    return WarmResult.restored("compiler state restored");
+                    return compilerStateResult;
                 });
     }
 

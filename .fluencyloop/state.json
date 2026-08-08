@@ -1,10 +1,10 @@
 {
-  "feature": "34-wire-cache-warmer-into-the-maven-runtime-lifecycle",
-  "branch": "feature/34-wire-cache-warmer-into-the-maven-runtime-lifecycle",
+  "feature": "41-make-valid-compiler-cache-hits-skip-maven-compilation-in",
+  "branch": "feature/41-make-valid-compiler-cache-hits-skip-maven-compilation-in",
   "stage": "build",
-  "last_session": "docs/fluencyloop/features/34-wire-cache-warmer-into-the-maven-runtime-lifecycle/sessions/003-publish-only-after-a-successful-maven-session.md",
-  "base_ref": "main",
-  "feature_dir": "docs/fluencyloop/features/34-wire-cache-warmer-into-the-maven-runtime-lifecycle",
+  "last_session": "docs/fluencyloop/features/41-make-valid-compiler-cache-hits-skip-maven-compilation-in/sessions/002-skip-only-a-fully-restored-production-compiler-execution.md",
+  "base_ref": "feature/skip-cache-in-track-child",
+  "feature_dir": "docs/fluencyloop/features/41-make-valid-compiler-cache-hits-skip-maven-compilation-in",
   "plan": "",
-  "updated": "2026-08-07"
+  "updated": "2026-08-08"
 }
