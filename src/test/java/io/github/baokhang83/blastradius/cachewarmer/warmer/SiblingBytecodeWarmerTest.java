@@ -36,13 +36,16 @@ class SiblingBytecodeWarmerTest {
         write(basedir, "src/main/java/Foo.java", "class Foo {}");
         String key = keys.keyFor(module, Tier.SIBLING_BYTECODE);
         SiblingBytecodeWarmer warmer = new SiblingBytecodeWarmer(
-                cache(Map.of(key, zip(Map.of("com/example/Foo.class", "bytecode")))), keys);
+                cache(Map.of(key, zip(Map.of(
+                        "com/example/Foo.class", "bytecode",
+                        "application.properties", "cached resource")))), keys);
 
         WarmResult result = warmer.warm(module);
 
         assertEquals(WarmResult.WarmStatus.RESTORED, result.status());
         assertTrue(result.reason().contains(key));
         assertEquals("bytecode", read(basedir.resolve("build-output/classes/com/example/Foo.class")));
+        assertFalse(Files.exists(basedir.resolve("build-output/classes/application.properties")));
     }
 
     @Test
@@ -91,7 +94,22 @@ class SiblingBytecodeWarmerTest {
     }
 
     @Test
-    void warm_preservesAnExistingClassesDirectory(@TempDir Path basedir) {
+    void warm_mergesBytecodeWhenResourcesAlreadyCreatedTheOutputDirectory(@TempDir Path basedir) {
+        MavenProject module = project(basedir);
+        write(basedir, "src/main/java/Foo.java", "class Foo {}");
+        write(basedir, "build-output/classes/application.properties", "keep");
+        String key = keys.keyFor(module, Tier.SIBLING_BYTECODE);
+
+        WarmResult result = new SiblingBytecodeWarmer(
+                cache(Map.of(key, zip(Map.of("com/example/Foo.class", "bytecode")))), keys).warm(module);
+
+        assertEquals(WarmResult.WarmStatus.RESTORED, result.status());
+        assertEquals("bytecode", read(basedir.resolve("build-output/classes/com/example/Foo.class")));
+        assertEquals("keep", read(basedir.resolve("build-output/classes/application.properties")));
+    }
+
+    @Test
+    void warm_preservesExistingCompiledBytecode(@TempDir Path basedir) {
         MavenProject module = project(basedir);
         write(basedir, "src/main/java/Foo.java", "class Foo {}");
         write(basedir, "build-output/classes/Existing.class", "keep");
@@ -99,6 +117,7 @@ class SiblingBytecodeWarmerTest {
         WarmResult result = new SiblingBytecodeWarmer(cache(Map.of()), keys).warm(module);
 
         assertEquals(WarmResult.WarmStatus.SKIPPED, result.status());
+        assertTrue(result.reason().contains("compiled bytecode already exists"));
         assertEquals("keep", read(basedir.resolve("build-output/classes/Existing.class")));
     }
 

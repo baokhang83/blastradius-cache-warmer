@@ -34,6 +34,7 @@ class SlicePublisherTest {
         write(basedir, "src/main/java/Foo.java", "class Foo {}");
         MavenProject module = project(basedir, "core", "build-output/classes", "build-output");
         write(basedir, "build-output/classes/com/example/Foo.class", "bytecode");
+        write(basedir, "build-output/classes/application.properties", "current resource");
         write(
                 basedir,
                 "build-output/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst",
