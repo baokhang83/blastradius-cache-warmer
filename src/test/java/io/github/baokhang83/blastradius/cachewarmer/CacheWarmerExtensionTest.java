@@ -7,9 +7,12 @@ import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Exercises {@link CacheWarmerExtension#applyGate} directly rather than
@@ -58,6 +61,19 @@ class CacheWarmerExtensionTest {
         CacheWarmerExtension extension = new CacheWarmerExtension(throwingGate);
 
         assertDoesNotThrow(() -> extension.applyGate(List.of(projectWithPlugins())));
+    }
+
+    @Test
+    void identifiesTheNestedBlastradiusTrackingProcess() {
+        Properties properties = new Properties();
+        properties.setProperty("blastradius.trackChild", "true");
+
+        assertTrue(CacheWarmerExtension.isBlastradiusTrackChild(properties));
+    }
+
+    @Test
+    void doesNotTreatAnOuterBuildAsANestedBlastradiusTrackingProcess() {
+        assertFalse(CacheWarmerExtension.isBlastradiusTrackChild(new Properties()));
     }
 
     private static MavenProject projectWithPlugins(Plugin... plugins) {
