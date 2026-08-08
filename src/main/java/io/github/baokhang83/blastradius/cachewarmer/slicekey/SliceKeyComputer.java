@@ -1,5 +1,6 @@
 package io.github.baokhang83.blastradius.cachewarmer.slicekey;
 
+import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class SliceKeyComputer {
             digest.update(basedir.relativize(file).toString().getBytes(StandardCharsets.UTF_8));
             digest.update(readBytes(file));
         }
+        updateCompilerConfiguration(digest, module);
         digest.update(System.getProperty("java.version").getBytes(StandardCharsets.UTF_8));
 
         String hex = HexFormat.of().formatHex(digest.digest());
@@ -60,6 +62,28 @@ public class SliceKeyComputer {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static void updateCompilerConfiguration(MessageDigest digest, MavenProject module) {
+        module.getBuildPlugins().stream()
+                .filter(SliceKeyComputer::isMavenCompilerPlugin)
+                .sorted(Comparator.comparing(SliceKeyComputer::pluginIdentity))
+                .forEach(plugin -> {
+                    digest.update(pluginIdentity(plugin).getBytes(StandardCharsets.UTF_8));
+                    digest.update(String.valueOf(plugin.getConfiguration()).getBytes(StandardCharsets.UTF_8));
+                });
+    }
+
+    private static boolean isMavenCompilerPlugin(Plugin plugin) {
+        return (plugin.getGroupId() == null || "org.apache.maven.plugins".equals(plugin.getGroupId()))
+                && "maven-compiler-plugin".equals(plugin.getArtifactId());
+    }
+
+    private static String pluginIdentity(Plugin plugin) {
+        return String.join(":",
+                plugin.getGroupId() == null ? "org.apache.maven.plugins" : plugin.getGroupId(),
+                plugin.getArtifactId(),
+                plugin.getVersion() == null ? "" : plugin.getVersion());
     }
 
     private static MessageDigest sha256() {

@@ -4,6 +4,7 @@ import io.github.baokhang83.blastradius.cachewarmer.warmer.WarmResult;
 import org.apache.maven.execution.AbstractExecutionListener;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +20,27 @@ final class CacheLifecycleListener extends AbstractExecutionListener {
     private final RuntimeBuildContext context;
     private final Function<MavenProject, WarmResult> bytecodeWarmer;
     private final Function<MavenProject, WarmResult> compilerStateWarmer;
+    private final MavenCompilerSkipper compilerSkipper;
 
     CacheLifecycleListener(
             ExecutionListener delegate,
             RuntimeBuildContext context,
             Function<MavenProject, WarmResult> bytecodeWarmer,
             Function<MavenProject, WarmResult> compilerStateWarmer) {
+        this(delegate, context, bytecodeWarmer, compilerStateWarmer, new MavenCompilerSkipper());
+    }
+
+    CacheLifecycleListener(
+            ExecutionListener delegate,
+            RuntimeBuildContext context,
+            Function<MavenProject, WarmResult> bytecodeWarmer,
+            Function<MavenProject, WarmResult> compilerStateWarmer,
+            MavenCompilerSkipper compilerSkipper) {
         this.delegate = delegate;
         this.context = context;
         this.bytecodeWarmer = bytecodeWarmer;
         this.compilerStateWarmer = compilerStateWarmer;
+        this.compilerSkipper = compilerSkipper;
     }
 
     @Override
@@ -100,8 +112,12 @@ final class CacheLifecycleListener extends AbstractExecutionListener {
             return;
         }
 
-        warm(project, "sibling bytecode", bytecodeWarmer);
-        warm(project, "compiler state", compilerStateWarmer);
+        WarmResult bytecode = warm(project, "sibling bytecode", bytecodeWarmer);
+        WarmResult compilerState = warm(project, "compiler state", compilerStateWarmer);
+        if (bytecode.status() == WarmResult.WarmStatus.RESTORED
+                && compilerState.status() == WarmResult.WarmStatus.RESTORED) {
+            skipCompiler(project, event.getMojoExecution());
+        }
     }
 
     @Override
@@ -136,13 +152,25 @@ final class CacheLifecycleListener extends AbstractExecutionListener {
                 && "compile".equals(event.getMojoExecution().getGoal());
     }
 
-    private static void warm(
+    private static WarmResult warm(
             MavenProject project, String tier, Function<MavenProject, WarmResult> warmer) {
         try {
             WarmResult result = warmer.apply(project);
             LOGGER.info("[cache-warmer] {} {}: {}", project.getArtifactId(), tier, result.reason());
+            return result;
         } catch (RuntimeException e) {
             LOGGER.warn("[cache-warmer] {} {} failed - continuing cold", project.getArtifactId(), tier, e);
+            return WarmResult.skipped("runtime cache warming failed");
+        }
+    }
+
+    private void skipCompiler(MavenProject project, MojoExecution execution) {
+        try {
+            compilerSkipper.skip(execution);
+            LOGGER.info("[cache-warmer] {} compiler: skipped after verified bytecode and compiler-state restore",
+                    project.getArtifactId());
+        } catch (RuntimeException e) {
+            LOGGER.warn("[cache-warmer] {} compiler skip setup failed - continuing cold", project.getArtifactId(), e);
         }
     }
 }

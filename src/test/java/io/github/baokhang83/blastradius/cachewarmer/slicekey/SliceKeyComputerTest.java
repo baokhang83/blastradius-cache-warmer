@@ -1,7 +1,10 @@
 package io.github.baokhang83.blastradius.cachewarmer.slicekey;
 
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -78,6 +81,18 @@ class SliceKeyComputerTest {
     }
 
     @Test
+    void keyFor_changesWhenEffectiveCompilerConfigurationChanges(@TempDir Path basedir) {
+        write(basedir, "src/main/java/Foo.java", "class Foo {}");
+        MavenProject module = project(basedir, "core");
+        addCompilerConfiguration(module, "17");
+        String before = computer.keyFor(module, Tier.SIBLING_BYTECODE);
+
+        addCompilerConfiguration(module, "21");
+
+        assertNotEquals(before, computer.keyFor(module, Tier.SIBLING_BYTECODE));
+    }
+
+    @Test
     void keyFor_differsAcrossModules_withIdenticalSourceContent(
             @TempDir Path basedirA, @TempDir Path basedirB) {
         write(basedirA, "src/main/java/Foo.java", "class Foo {}");
@@ -116,5 +131,20 @@ class SliceKeyComputerTest {
         MavenProject project = new MavenProject(model);
         project.setFile(new File(basedir.toFile(), "pom.xml"));
         return project;
+    }
+
+    private static void addCompilerConfiguration(MavenProject project, String release) {
+        Xpp3Dom configuration = new Xpp3Dom("configuration");
+        Xpp3Dom releaseNode = new Xpp3Dom("release");
+        releaseNode.setValue(release);
+        configuration.addChild(releaseNode);
+        Plugin compiler = new Plugin();
+        compiler.setGroupId("org.apache.maven.plugins");
+        compiler.setArtifactId("maven-compiler-plugin");
+        compiler.setVersion("3.13.0");
+        compiler.setConfiguration(configuration);
+        Build build = project.getBuild();
+        build.removePlugin(compiler);
+        build.addPlugin(compiler);
     }
 }
