@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -35,15 +36,20 @@ public class SlicePublisher {
     /** Publishes a module's compiled production classes and incremental compiler state when present. */
     public void publish(MavenProject module) {
         Build build = module.getBuild();
-        publishIfPresent(module, Tier.SIBLING_BYTECODE, buildPath(module, build.getOutputDirectory()));
+        publishIfPresent(
+                module,
+                Tier.SIBLING_BYTECODE,
+                buildPath(module, build.getOutputDirectory()),
+                path -> path.getFileName().toString().endsWith(".class"));
         publishIfPresent(
                 module,
                 Tier.COMPILER_STATE,
-                buildPath(module, build.getDirectory()).resolve("maven-status"));
+                buildPath(module, build.getDirectory()).resolve("maven-status"),
+                path -> true);
     }
 
-    private void publishIfPresent(MavenProject module, Tier tier, Path outputDirectory) {
-        archive(outputDirectory).ifPresent(data -> SliceIntegrity.put(cache, keys.keyFor(module, tier), data));
+    private void publishIfPresent(MavenProject module, Tier tier, Path outputDirectory, Predicate<Path> include) {
+        archive(outputDirectory, include).ifPresent(data -> SliceIntegrity.put(cache, keys.keyFor(module, tier), data));
     }
 
     private static Path buildPath(MavenProject module, String directory) {
@@ -51,12 +57,12 @@ public class SlicePublisher {
         return path.isAbsolute() ? path : module.getBasedir().toPath().resolve(path);
     }
 
-    private static Optional<byte[]> archive(Path directory) {
+    private static Optional<byte[]> archive(Path directory, Predicate<Path> include) {
         if (!Files.isDirectory(directory)) {
             return Optional.empty();
         }
 
-        List<Path> files = filesIn(directory);
+        List<Path> files = filesIn(directory, include);
         if (files.isEmpty()) {
             return Optional.empty();
         }
@@ -77,10 +83,11 @@ public class SlicePublisher {
         }
     }
 
-    private static List<Path> filesIn(Path directory) {
+    private static List<Path> filesIn(Path directory, Predicate<Path> include) {
         try (var paths = Files.walk(directory)) {
             return paths
                     .filter(Files::isRegularFile)
+                    .filter(include)
                     .sorted((left, right) -> directory.relativize(left).compareTo(directory.relativize(right)))
                     .toList();
         } catch (IOException e) {

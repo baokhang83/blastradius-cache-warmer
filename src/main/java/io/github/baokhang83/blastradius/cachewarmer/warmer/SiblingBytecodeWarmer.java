@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-/** Restores a cached Tier A sibling-bytecode archive into a clean module output directory. */
+/** Restores a cached Tier A sibling-bytecode archive before Maven compiles the module. */
 public class SiblingBytecodeWarmer {
 
     private final SliceCache cache;
@@ -24,13 +24,15 @@ public class SiblingBytecodeWarmer {
     }
 
     /**
-     * Restores the Tier A archive for {@code module} when its configured output directory is
-     * absent. Callers select only safe-to-warm modules using the blast-radius result.
+     * Restores the Tier A archive for {@code module} unless a local compilation has already
+     * produced class files. Maven's resources phase normally creates the output directory before
+     * the compiler starts, so a resource-only directory is merged with the verified archive.
+     * Callers select only safe-to-warm modules using the blast-radius result.
      */
     public WarmResult warm(MavenProject module) {
         Path outputDirectory = outputDirectory(module);
-        if (Files.exists(outputDirectory)) {
-            return WarmResult.skipped("bytecode output already exists at " + outputDirectory);
+        if (containsClassFiles(outputDirectory)) {
+            return WarmResult.skipped("compiled bytecode already exists at " + outputDirectory);
         }
 
         String key;
@@ -50,7 +52,7 @@ public class SiblingBytecodeWarmer {
         }
 
         try {
-            ArchiveRestorer.restore(slice.get(), outputDirectory);
+            ArchiveRestorer.restoreClassFiles(slice.get(), outputDirectory);
             return WarmResult.restored("restored sibling bytecode from key '" + key + "'");
         } catch (IOException | IllegalArgumentException e) {
             return WarmResult.skipped("could not restore sibling bytecode for key '" + key + "': " + e.getMessage());
@@ -61,6 +63,17 @@ public class SiblingBytecodeWarmer {
         Build build = module.getBuild();
         Path output = Path.of(build.getOutputDirectory());
         return output.isAbsolute() ? output : module.getBasedir().toPath().resolve(output);
+    }
+
+    private static boolean containsClassFiles(Path outputDirectory) {
+        if (!Files.isDirectory(outputDirectory)) {
+            return false;
+        }
+        try (var paths = Files.walk(outputDirectory)) {
+            return paths.anyMatch(path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".class"));
+        } catch (IOException e) {
+            return true;
+        }
     }
 
 }
