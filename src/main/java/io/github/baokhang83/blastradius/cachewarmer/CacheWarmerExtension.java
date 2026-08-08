@@ -50,6 +50,13 @@ public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
 
     @Override
     public void afterProjectsRead(MavenSession session) {
+        if (isBlastradiusTrackChild(mergedProperties(session))) {
+            // Blastradius TRACK deliberately launches `mvn clean test` in a child process.
+            // Any restored outputs would be deleted immediately by `clean`, and that child
+            // must not publish competing slices while the outer build is still active.
+            LOGGER.info("[cache-warmer] Blastradius TRACK child detected - skipping cache runtime setup");
+            return;
+        }
         if (!applyGate(session.getProjects())) {
             return;
         }
@@ -116,6 +123,10 @@ public class CacheWarmerExtension extends AbstractMavenLifecycleParticipant {
         properties.putAll(session.getSystemProperties());
         properties.putAll(session.getUserProperties());
         return properties;
+    }
+
+    static boolean isBlastradiusTrackChild(Properties properties) {
+        return Boolean.parseBoolean(properties.getProperty("blastradius.trackChild", "false"));
     }
 
     private static String baseRef(MavenSession session) {
